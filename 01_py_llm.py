@@ -99,7 +99,7 @@ client = MyCustomOpenAI(
 )
 
 response = client.generate_text(
-    "What is an the difference between Pydantic.ai and Lnagchain?"
+    "What is an the difference between CrewAI and AutoGen?"
 )
 
 
