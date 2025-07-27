@@ -1,12 +1,13 @@
-## 
+## UV
 
 - `uv sync`
 - `uv pin 3.12`
 - `uv python pin 3.12`
 - `uv run 01_py_llm.py`
 
+## UV -> requirements.txt
 
-
+`uv pip freeze > requirements.txt`
 
 ## Clear git cache
 
