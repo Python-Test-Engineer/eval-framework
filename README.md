@@ -1,4 +1,4 @@
-Combining Python Full Stack test framework with LLM Evals.
+Combining Python Full Stack test framework with Evals.
 
 Please see [https://evaluating-ai-agents.netlify.app/](https://evaluating-ai-agents.netlify.app/) for more information.
 
