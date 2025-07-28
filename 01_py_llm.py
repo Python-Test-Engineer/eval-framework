@@ -24,6 +24,7 @@ else:
 MODEL = "gpt-4o-mini"
 console.print(f"[dark_orange]Model selected: {MODEL}[/]")
 
+query = "What is an the difference between Pandas and AutoGen?"
 
 # For demo, we will create our own OpenAI request class but in future we will use the OpenAI library.
 #
@@ -98,9 +99,7 @@ client = MyCustomOpenAI(
     temperature=0.0,  # as deterministic as possible
 )
 
-response = client.generate_text(
-    "What is an the difference between CrewAI and AutoGen?"
-)
+response = client.generate_text(query)
 
 
 # We can drill down into 'response' to get our choice of data
@@ -110,6 +109,6 @@ console.print(response)
 # print(response["choices"][0])
 # print(response["choices"][0]["message"])
 print("=====================================\n\n")
-
+print(f"Query: {query}\n")
 console.print(response["choices"][0]["message"]["content"])
 print("\n\n")

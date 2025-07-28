@@ -1,5 +1,5 @@
 [project]
-name = "llm-evaluation-framework"
+name = "Agent-Evals"
 version = "2.0.0"
 description = "An integration of Pytest Full Stack, Evidently and AI Agents"
 readme = "README.md"
