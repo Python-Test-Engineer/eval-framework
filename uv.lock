@@ -43,6 +43,7 @@ dependencies = [
     { name = "langchain-openai" },
     { name = "langgraph" },
     { name = "langgraph-checkpoint-sqlite" },
+    { name = "linkup-sdk" },
     { name = "mock" },
     { name = "nltk" },
     { name = "openai" },
@@ -86,6 +87,7 @@ requires-dist = [
     { name = "langchain-openai", specifier = ">=0.3.27" },
     { name = "langgraph", specifier = ">=0.5.1" },
     { name = "langgraph-checkpoint-sqlite", specifier = ">=2.0.10" },
+    { name = "linkup-sdk", specifier = ">=0.2.8" },
     { name = "mock", specifier = ">=5.2.0" },
     { name = "nltk", specifier = ">=3.9.1" },
     { name = "openai", specifier = ">=1.93.0" },
@@ -1901,6 +1903,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/20/c8/8d2e0fc438d2d3d8d4300f7684ea30a754344ed00d7ba9cc2705241d2a5f/langsmith-0.4.4.tar.gz", hash = "sha256:70c53bbff24a7872e88e6fa0af98270f4986a6e364f9e85db1cc5636defa4d66", size = 352105, upload-time = "2025-06-27T19:20:36.207Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1d/33/a3337eb70d795495a299a1640d7a75f17fb917155a64309b96106e7b9452/langsmith-0.4.4-py3-none-any.whl", hash = "sha256:014c68329bd085bd6c770a6405c61bb6881f82eb554ce8c4d1984b0035fd1716", size = 367687, upload-time = "2025-06-27T19:20:33.839Z" },
+]
+
+[[package]]
+name = "linkup-sdk"
+version = "0.2.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9e/15/17f441d73d1dea76398980497bb8a3cce8a2b63dab42779610c04b6800d6/linkup_sdk-0.2.8.tar.gz", hash = "sha256:7ed45b76bb585ebf88d7bafa248e4907d116b19661880978b862c5f8b3b79686", size = 9905, upload-time = "2025-07-01T07:15:33.54Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/a2/be93a8d93959e4e3756afa59c9312979ea641b90b7233acb4464a824f3c5/linkup_sdk-0.2.8-py3-none-any.whl", hash = "sha256:96acaf2c773963c21133b31d1ef18f5322ba07a34ef79c375fe75e44b9501cb6", size = 8729, upload-time = "2025-07-01T07:15:32.129Z" },
 ]
 
 [[package]]
