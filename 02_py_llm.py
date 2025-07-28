@@ -24,7 +24,7 @@ else:
 MODEL = "gpt-4o-mini"
 console.print(f"[dark_orange]Model selected: {MODEL}[/]")
 
-query = "What is an the difference between Pandas and AutoGen?"
+query = "What is an the difference between Agents SDK and AutoGen?"
 
 # For demo, we will create our own OpenAI request class but in future we will use the OpenAI library.
 #
