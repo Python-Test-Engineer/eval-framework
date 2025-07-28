@@ -12,6 +12,7 @@ dependencies = [
     "faiss-cpu>=1.11.0.post1",
     "google-api-python-client>=2.177.0",
     "gradio>=5.35.0",
+    "groq>=0.30.0",
     "ipykernel>=6.29.5",
     "langchain>=0.3.26",
     "langchain-community>=0.3.27",
