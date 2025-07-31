@@ -15,6 +15,16 @@ from random import randint
 PATH = "./chroma_db"
 COLLECTION_NAME = f"reports_{randint(1000, 9999)}"
 
+client = chromadb.PersistentClient(path=PATH)
+
+collections = [col.name for col in client.list_collections()]
+
+if COLLECTION_NAME in collections:
+    print(f"Loading existing collection: {COLLECTION_NAME}")
+
+else:
+    print(f"Creating new collection: {COLLECTION_NAME}")
+
 
 # Create a sample CSV file with 10 records
 def create_sample_csv(
