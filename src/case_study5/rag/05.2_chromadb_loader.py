@@ -13,6 +13,10 @@ from typing import List, Dict, Any
 from random import randint
 from sample_data import sample_data
 
+from rich.console import Console
+
+console = Console()
+
 PATH = "./chroma_db"
 COLLECTION_NAME = f"reports_{randint(1000, 9999)}"
 
@@ -129,7 +133,7 @@ def load_csv_to_chromadb(csv_file: str, collection_name: str = COLLECTION_NAME):
 def query_example(
     collection,
     query_text: str = "How did renewable investments do last year?",
-    n_results: int = 3,
+    n_results: int = 2,
 ):
     """Run a sample query against the loaded collection"""
     results = collection.query(
@@ -148,9 +152,8 @@ def query_example(
         )
     ):
         print(f"\nResult No: {i+1} \nid: {ids} \ndistance: {distance:.4f}")
-        print(f"Document: {doc[:100] + '...' if len(doc) > 100 else ''}")
+        print(f"Document: {doc[:500] + '...' if len(doc) > 200 else ''}")
         print(f"Metadata: {metadata}")
-
     return results
 
 
@@ -160,8 +163,11 @@ if __name__ == "__main__":
 
     # Load data into ChromaDB
     collection = load_csv_to_chromadb(csv_file)
-    query_example(collection, query_text="What was the climate change about last year?")
-    # Run an example query
-    # query_example(collection)
+    query_text = "What was the climate change about last year?"
+    query_text = "Why was food price volatility so high?"
+    query_text = "What does CRISPR-Cas9 enable?"
+    query_text = "Optimise self driving?"
+    console.print(f"\n[green bold]Query Text: {query_text}[/]")
+    query_example(collection, query_text=query_text)
 
     print("\nScript completed successfully!")
