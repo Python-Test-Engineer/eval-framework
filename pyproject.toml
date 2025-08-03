@@ -8,6 +8,7 @@ dependencies = [
     "bs4>=0.0.2",
     "chromadb>=1.0.15",
     "ddgs>=9.0.0",
+    "evaluate>=0.4.4",
     "evidently[llm]>=0.7.9",
     "faiss-cpu>=1.11.0.post1",
     "google-api-python-client>=2.177.0",
