@@ -1,0 +1,98 @@
+[
+  {
+    "question":"What is the rate limiting for requests per hour per API key in our REST API?",
+    "contexts":[
+      "Our REST API provides endpoints for user authentication, data management, and analytics. Authentication uses JWT tokens with a 24-hour expiration. The base URL is https:\/\/api. example. com\/v1. Rate limiting applies 1000 requests per hour per API key. All responses use JSON format. Error codes follow HTTP standards with detailed error messages in the response body."
+    ],
+    "ground_truth":"The rate limiting for requests per hour per API key in our REST API is 1000 requests.",
+    "question_type":"factual"
+  },
+  {
+    "question":"How do I include my API key in the Authorization header when configuring my HTTP client?",
+    "contexts":[
+      "To get started, create an account and generate your API key from the dashboard. Configure your HTTP client with the base URL and include your API key in the Authorization header. Common workflows include: 1) Authenticate to get a token, 2) Upload your data, 3) Process the data, 4) Retrieve results. Use pagination for large datasets and implement retry logic for network errors."
+    ],
+    "ground_truth":"To include your API key in the Authorization header when configuring your HTTP client, you need to set the header with the value of your API key. This can typically be done by adding a header with the key \"Authorization\" and the value \"Bearer YOUR_API_KEY\" before making any API requests.",
+    "question_type":"how_to"
+  },
+  {
+    "question":"What should be done if encountering a 401 error while working with authentication tokens?",
+    "contexts":[
+      "Common issues and solutions: 429 errors indicate rate limiting - implement exponential backoff. 401 errors mean invalid or expired tokens - refresh your authentication. 500 errors are server-side issues - retry after a delay. Network timeouts should trigger automatic retries with increasing delays."
+    ],
+    "ground_truth":"If encountering a 401 error, it indicates invalid or expired tokens. The solution is to refresh your authentication tokens.",
+    "question_type":"troubleshooting"
+  },
+  {
+    "question":"Why is it important for our REST API to use JWT tokens with a 24-hour expiration for authentication?",
+    "contexts":[
+      "Our REST API provides endpoints for user authentication, data management, and analytics. Authentication uses JWT tokens with a 24-hour expiration. The base URL is https:\/\/api. example. com\/v1. Rate limiting applies 1000 requests per hour per API key. All responses use JSON format. Error codes follow HTTP standards with detailed error messages in the response body."
+    ],
+    "ground_truth":"It is important for our REST API to use JWT tokens with a 24-hour expiration for authentication to ensure security and prevent unauthorized access to user data. By setting an expiration time on the tokens, we can limit the window of opportunity for malicious actors to intercept and use them. This helps to protect sensitive user information and maintain the integrity of our system.",
+    "question_type":"conceptual"
+  },
+  {
+    "question":"What are the common workflows for using the API mentioned in the content?",
+    "contexts":[
+      "To get started, create an account and generate your API key from the dashboard. Configure your HTTP client with the base URL and include your API key in the Authorization header. Common workflows include: 1) Authenticate to get a token, 2) Upload your data, 3) Process the data, 4) Retrieve results. Use pagination for large datasets and implement retry logic for network errors."
+    ],
+    "ground_truth":"The common workflows for using the API mentioned in the content include authenticating to get a token, uploading data, processing the data, and retrieving results.",
+    "question_type":"factual"
+  },
+  {
+    "question":"How should one handle network timeouts according to the provided content?",
+    "contexts":[
+      "Common issues and solutions: 429 errors indicate rate limiting - implement exponential backoff. 401 errors mean invalid or expired tokens - refresh your authentication. 500 errors are server-side issues - retry after a delay. Network timeouts should trigger automatic retries with increasing delays."
+    ],
+    "ground_truth":"Network timeouts should trigger automatic retries with increasing delays.",
+    "question_type":"how_to"
+  },
+  {
+    "question":"What could be the potential issue if a user is unable to authenticate using the JWT tokens provided by our REST API?",
+    "contexts":[
+      "Our REST API provides endpoints for user authentication, data management, and analytics. Authentication uses JWT tokens with a 24-hour expiration. The base URL is https:\/\/api. example. com\/v1. Rate limiting applies 1000 requests per hour per API key. All responses use JSON format. Error codes follow HTTP standards with detailed error messages in the response body."
+    ],
+    "ground_truth":"If a user is unable to authenticate using the JWT tokens provided by our REST API, it could be due to issues such as expired tokens, incorrect token format, or mismatch between the token and the user's credentials. It is important to ensure that the tokens are generated correctly and within the 24-hour expiration window to avoid authentication failures.",
+    "question_type":"troubleshooting"
+  },
+  {
+    "question":"Why is it important to include your API key in the Authorization header when configuring your HTTP client?",
+    "contexts":[
+      "To get started, create an account and generate your API key from the dashboard. Configure your HTTP client with the base URL and include your API key in the Authorization header. Common workflows include: 1) Authenticate to get a token, 2) Upload your data, 3) Process the data, 4) Retrieve results. Use pagination for large datasets and implement retry logic for network errors."
+    ],
+    "ground_truth":"Including your API key in the Authorization header is crucial because it allows the server to authenticate and authorize your requests. This ensures that only authorized users can access and interact with the API, maintaining security and preventing unauthorized access to sensitive data or functionalities.",
+    "question_type":"conceptual"
+  },
+  {
+    "question":"What should be done when encountering a 429 error?",
+    "contexts":[
+      "Common issues and solutions: 429 errors indicate rate limiting - implement exponential backoff. 401 errors mean invalid or expired tokens - refresh your authentication. 500 errors are server-side issues - retry after a delay. Network timeouts should trigger automatic retries with increasing delays."
+    ],
+    "ground_truth":"Implement exponential backoff when encountering a 429 error, as it indicates rate limiting.",
+    "question_type":"factual"
+  },
+  {
+    "question":"How can I authenticate users using the REST API provided?",
+    "contexts":[
+      "Our REST API provides endpoints for user authentication, data management, and analytics. Authentication uses JWT tokens with a 24-hour expiration. The base URL is https:\/\/api. example. com\/v1. Rate limiting applies 1000 requests per hour per API key. All responses use JSON format. Error codes follow HTTP standards with detailed error messages in the response body."
+    ],
+    "ground_truth":"To authenticate users using the REST API, you need to generate a JWT token with a 24-hour expiration. You can do this by sending a POST request to the authentication endpoint at https:\/\/api.example.com\/v1\/authenticate with the user's credentials. If the credentials are valid, the API will respond with a JWT token that you can include in the headers of your subsequent requests for data management and analytics endpoints.",
+    "question_type":"how_to"
+  },
+  {
+    "question":"What should be done if the HTTP client is not configured with the base URL and API key properly?",
+    "contexts":[
+      "To get started, create an account and generate your API key from the dashboard. Configure your HTTP client with the base URL and include your API key in the Authorization header. Common workflows include: 1) Authenticate to get a token, 2) Upload your data, 3) Process the data, 4) Retrieve results. Use pagination for large datasets and implement retry logic for network errors."
+    ],
+    "ground_truth":"If the HTTP client is not configured with the base URL and API key properly, the system will not be able to authenticate, upload data, process data, or retrieve results. It is essential to ensure that the HTTP client is configured correctly with the base URL and API key in the Authorization header to enable successful communication with the API.",
+    "question_type":"troubleshooting"
+  },
+  {
+    "question":"Why is it important to implement exponential backoff for 429 errors indicating rate limiting?",
+    "contexts":[
+      "Common issues and solutions: 429 errors indicate rate limiting - implement exponential backoff. 401 errors mean invalid or expired tokens - refresh your authentication. 500 errors are server-side issues - retry after a delay. Network timeouts should trigger automatic retries with increasing delays."
+    ],
+    "ground_truth":"Implementing exponential backoff for 429 errors is important because it helps prevent overwhelming the server with too many requests in a short period. By increasing the delay between each retry exponentially, it allows the server to recover and handle the requests more effectively without causing further issues.",
+    "question_type":"conceptual"
+  }
+]

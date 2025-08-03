@@ -1,0 +1,37 @@
+[
+  {
+    "question":"What is LangChain and what does it enable developers to build?",
+    "contexts":[
+      "LangChain is a framework for developing applications powered by language models. It enables developers to build context-aware and reasoning applications."
+    ],
+    "ground_truth":"LangChain is a framework for developing applications powered by language models that enables developers to build context-aware and reasoning applications by connecting language models to other sources of computation or knowledge."
+  },
+  {
+    "question":"How do OpenAI agents handle complex tasks?",
+    "contexts":[
+      "OpenAI agents are AI systems that can understand and execute complex tasks by breaking them down into smaller steps using large language models like GPT-4."
+    ],
+    "ground_truth":"OpenAI agents handle complex tasks by breaking them down into smaller steps, using large language models like GPT-4 to reason about problems, make decisions, and interact with various tools and APIs."
+  },
+  {
+    "question":"What are the popular types of LangChain agents?",
+    "contexts":[
+      "Popular agent types include ReAct agents, which combine reasoning and acting, and conversational agents that maintain context across interactions."
+    ],
+    "ground_truth":"Popular LangChain agent types include ReAct agents that combine reasoning and acting, and conversational agents that maintain context across interactions."
+  },
+  {
+    "question":"What types of memory can LangChain agents use?",
+    "contexts":[
+      "Agent memory in LangChain includes conversation buffer memory, summary memory, and vector store memory."
+    ],
+    "ground_truth":"LangChain agents can use conversation buffer memory, summary memory, and vector store memory to persist information across conversations."
+  },
+  {
+    "question":"How does tool calling work in AI agents?",
+    "contexts":[
+      "Tool calling allows OpenAI models to generate structured outputs that can trigger specific tools or functions, with LangChain providing framework integration."
+    ],
+    "ground_truth":"Tool calling allows AI models to generate structured outputs that trigger specific tools or functions, with LangChain providing a framework to integrate these tool calls into agent workflows."
+  }
+]
