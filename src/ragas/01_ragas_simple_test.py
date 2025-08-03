@@ -79,7 +79,7 @@ def test_openai_setup():
         api_key = os.getenv("OPENAI_API_KEY")
         if api_key:
             print("✓ API key found in environment")
-            print(f"API key starts with: {api_key[:8]}...")
+            print(f"API key starts with: {api_key[:14]}...")
         else:
             print("✗ No API key found in environment")
             return False

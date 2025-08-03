@@ -225,7 +225,9 @@ def main():
     try:
         # Create sample dataset
         print("\n1. Creating sample dataset...")
-        df = pd.read_csv("./src/ragas/02_rag_test_dataset.csv")
+        df = pd.read_csv(
+            "./src/ragas/02_rag_test_dataset.csv", sep="|", encoding="utf-8"
+        )
         print(f"   Created {len(df)} examples")
 
         # Prepare for RAGAS
@@ -267,4 +269,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print("STARTING RAGAS Evaluation v2...")
     main()

@@ -5,7 +5,7 @@ This dataset contains questions, contexts, and ground truth answers for evaluati
 """
 
 import pandas as pd
-from typing import List, Dict
+
 
 
 def create_sample_dataset() -> pd.DataFrame:
@@ -78,9 +78,12 @@ def create_sample_dataset() -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def save_dataset(df: pd.DataFrame, filename: str = "./src/ragas/02_rag_test_dataset.csv"):
+def save_dataset(
+    df: pd.DataFrame,
+    filename: str = "./src/ragas/02_rag_test_dataset.csv",
+):
     """Save the dataset to a CSV file."""
-    df.to_csv(filename, index=False)
+    df.to_csv(filename, index=False, sep="|")
     print(f"Dataset saved to {filename}")
 
 
@@ -88,5 +91,6 @@ if __name__ == "__main__":
     # Create and save the dataset
     dataset = create_sample_dataset()
     print("Sample Dataset:")
+    print(dataset.shape)
     print(dataset.head())
     save_dataset(dataset)
