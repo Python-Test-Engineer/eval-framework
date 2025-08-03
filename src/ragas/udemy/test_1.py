@@ -30,19 +30,19 @@ print("Starting...")
 # # # Use it like any LangChain LLM
 # response = llm.invoke("What is the capital of France?")
 # console.print(f"[green]GROQ TEST: {response.content}[/]")
+# power of LLM + method metric ->score
+llm = ChatOpenAI(model=MODEL, temperature=0)
+llm = ChatGroq(
+    model="llama-3.3-70b-versatile",  # or other Groq models
+    groq_api_key=GROQ_API_KEY,  # or set GROQ_API_KEY env var
+    temperature=0.0,
+)
 
 
 @pytest.mark.asyncio
 async def test_context_precision():
     # create object of class for that specific metric
 
-    # power of LLM + method metric ->score
-    # llm = ChatOpenAI(model=MODEL, temperature=0)
-    llm = ChatGroq(
-        model="llama-3.3-70b-versatile",  # or other Groq models
-        groq_api_key=GROQ_API_KEY,  # or set GROQ_API_KEY env var
-        temperature=0.0,
-    )
     langchain_llm = LangchainLLMWrapper(llm)
     context_precision = LLMContextPrecisionWithoutReference(llm=langchain_llm)
     question = "How many articles are there in the Selenium webdriver python course?"
