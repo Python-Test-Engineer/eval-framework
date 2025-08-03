@@ -33,7 +33,7 @@ else:
 
 # Create a sample CSV file with 10 records
 def create_sample_csv(
-    file_path: str = "./src/case_study5/rag/05.3_chromadb_loader.csv",
+    file_path: str = "./src/case_study5/rag/05.3_collection.csv",
 ):
     """
     Create a sample CSV file with 10 records containing id, document, and metadata columns.
