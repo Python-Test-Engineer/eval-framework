@@ -1,9 +1,9 @@
 import pytest
-from ragas import SingleTurnSample, MultiTurnSample
+from ragas import  MultiTurnSample
 from ragas.messages import HumanMessage, AIMessage
-from ragas.metrics import Faithfulness, TopicAdherenceScore
+from ragas.metrics import TopicAdherenceScore
 
-from utils import load_test_data, get_llm_response
+
 
 # llm_wrapper from conftest
 #@pytest.mark.parametrize("getData", load_test_data("Test4.json"), indirect=True)
