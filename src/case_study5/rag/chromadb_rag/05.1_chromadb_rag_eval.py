@@ -1,8 +1,9 @@
 # Demo of using ChromaDB to load documents from a CSV file and query them SEMANTICALLY using metadata to refine search results so as not to search the entire document text.
 
-# It will become more useful later on when we do some Data Analytics but can be used for RAG as in FAQ, even taking in a filter returned from ROUTER.
+# We get RAG contexts back that form part of the inputs RAGAS needs
+# question, answer, contexts, grount_truth
 
-# ROUTER can provide the metadata to filter the results, e.g. by source, author, year, etc. and then we can use the metadata to refine the search results in ChromaDB to be the In Context Learning (ICL) for the RAG of FAQ.
+# It might be that the contexts are the answers to the questions.
 
 import pandas as pd
 import chromadb
@@ -180,7 +181,9 @@ if __name__ == "__main__":
     # query_text = "What does CRISPR-Cas9 enable?"
     # query_text = "Optimise self driving?"
     with open(CSV_RESULTS, "a") as f:
-        f.write("id|question|context|metadata\n")
+        # RAGAS uses question and contexts
+        # We will add answer and ground_truth columns to complete RAGAS input requirements
+        f.write("id|question|contexts|metadata\n")
     for i, query_text in enumerate(list_questions):
         console.print(f"\n[green bold]Query Text: {query_text}[/]")
         query_example(collection, query_text=query_text)
