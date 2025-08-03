@@ -225,7 +225,7 @@ def main():
     try:
         # Create sample dataset
         print("\n1. Creating sample dataset...")
-        df = pd.read_csv("./src/ragas/03_rag_test_dataset.csv")
+        df = pd.read_csv("./src/ragas/02_rag_test_dataset.csv")
         print(f"   Created {len(df)} examples")
 
         # Prepare for RAGAS
@@ -236,19 +236,19 @@ def main():
         # Run evaluation
         print("\n3. Running RAGAS evaluation...")
         results = run_ragas_evaluation_v2(dataset)
-        with open("./src/ragas/03_ragas_results.txt", "w") as f:
-            json.dump(results, f, indent=4)
+        # with open("./src/ragas/03_ragas_results.txt", "w") as f:
+        #     json.dump(results, f, indent=4)
 
-        # Display results
-        print("\n4. Displaying results...")
-        display_results_v2(results)
-        with open("./src/ragas/03_ragas_results.txt", "w") as f:
-            json.dump(results, f, indent=4)
+        # # Display results
+        # print("\n4. Displaying results...")
+        # display_results_v2(results)
+        # with open("./src/ragas/03_ragas_results.txt", "w") as f:
+        #     json.dump(results, f, indent=4)
 
         # Create summary
         print("\n5. Creating summary...")
         create_evaluation_summary(results, len(dataset))
-        with open("./src/ragas/03_ragas_summary.txt", "w") as f:
+        with open("./src/ragas/03_ragas_summary.json", "w") as f:
             json.dump(results, f, indent=4)
         print("\n✅ Evaluation completed successfully!")
 

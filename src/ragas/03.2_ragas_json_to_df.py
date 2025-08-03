@@ -1,4 +1,9 @@
-{
+import pandas as pd
+import json
+import ast
+
+# Your JSON data (you can also load this from a file)
+json_data = {
     "user_input": {
         "0": "What is the mission of OpenAI?",
         "1": "When was Microsoft founded?",
@@ -53,11 +58,11 @@
     },
     "answer_relevancy": {
         "0": 0.9893007951252031,
-        "1": 0.9545466535301124,
-        "2": 0.8877319890255091,
-        "3": 0.9843160656911492,
-        "4": 0.9908623801364603,
-        "5": 0.974811969588476
+        "1": 0.9544443098859813,
+        "2": 0.8877759514141648,
+        "3": 0.984300315826995,
+        "4": 0.9908968554155795,
+        "5": 0.9747489843693143
     },
     "context_recall": {
         "0": 1.0,
@@ -76,3 +81,60 @@
         "5": 0.9999999999
     }
 }
+
+def process_retrieved_contexts(contexts):
+    """Process the retrieved_contexts field which contains stringified lists"""
+    if isinstance(contexts, list) and len(contexts) > 0:
+        try:
+            # Parse the stringified list
+            return ast.literal_eval(contexts[0])
+        except:
+            return contexts
+    return contexts
+
+def json_to_dataframe(data):
+    """Convert the JSON data to a pandas DataFrame with each user input as a row"""
+    
+    # Get the number of rows based on user_input length
+    num_rows = len(data['user_input'])
+    
+    # Create a list to store all rows
+    rows = []
+    
+    for i in range(num_rows):
+        row = {
+            'user_input': data['user_input'][str(i)],
+            'response': data['response'][str(i)],
+            'reference': data['reference'][str(i)],
+            'retrieved_contexts': process_retrieved_contexts(data['retrieved_contexts'][str(i)]),
+            'faithfulness': data['faithfulness'][str(i)],
+            'answer_relevancy': data['answer_relevancy'][str(i)],
+            'context_recall': data['context_recall'][str(i)],
+            'context_precision': data['context_precision'][str(i)]
+        }
+        rows.append(row)
+    
+    return pd.DataFrame(rows)
+
+# Create the DataFrame
+df = json_to_dataframe(json_data)
+
+# Display the DataFrame
+print("DataFrame Shape:", df.shape)
+print("\nDataFrame Info:")
+print(df.info())
+print("\nFirst few rows:")
+print(df.head())
+
+# Save to CSV if needed
+# df.to_csv('evaluation_results.csv', index=False)
+
+# Alternative method if loading from a file:
+def load_json_and_convert(file_path):
+    """Load JSON from file and convert to DataFrame"""
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    return json_to_dataframe(data)
+
+# Example usage:
+# df = load_json_and_convert('paste.txt')  # if your file is JSON format

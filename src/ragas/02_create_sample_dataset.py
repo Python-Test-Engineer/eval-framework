@@ -78,7 +78,7 @@ def create_sample_dataset() -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def save_dataset(df: pd.DataFrame, filename: str = "./src/ragas/03_rag_test_dataset.csv"):
+def save_dataset(df: pd.DataFrame, filename: str = "./src/ragas/02_rag_test_dataset.csv"):
     """Save the dataset to a CSV file."""
     df.to_csv(filename, index=False)
     print(f"Dataset saved to {filename}")
