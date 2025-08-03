@@ -4,18 +4,10 @@ import openai
 from dotenv import load_dotenv, find_dotenv
 from rich.console import Console
 
-
 console = Console()
-
-
 load_dotenv(find_dotenv(), override=True)  # Load environment variables from .env file
 
-from dotenv import load_dotenv, find_dotenv
-from rich.console import Console
-
-
 console = Console()
-
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if OPENAI_API_KEY:
@@ -24,7 +16,6 @@ if OPENAI_API_KEY:
     )
 else:
     console.print("[red]OpenAI API Key not set[/]")
-
 
 MODEL = "gpt-4o-mini"
 console.print(f"[dark_orange]Model selected: {MODEL}[/]")
@@ -53,13 +44,11 @@ Text: {text}"""
 
 # Example usage
 if __name__ == "__main__":
-    # Set your OpenAI API key
-    API_KEY = "your-openai-api-key-here"
 
     # Example text with PII
     sample_text = "Hi, my name is John Smith and my email is john.smith@example.com. Please call me at 555-123-4567."
 
     # Replace PII
-    cleaned_text = replace_pii(sample_text, API_KEY)
+    cleaned_text = replace_pii(sample_text, OPENAI_API_KEY)
     print("Original:", sample_text)
     print("Cleaned: ", cleaned_text)
