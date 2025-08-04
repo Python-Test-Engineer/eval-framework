@@ -9,10 +9,11 @@ import pandas as pd
 import chromadb
 import json
 
-import csv
+# import csv
 
 from random import randint
-from sample_data import sample_data
+
+# from documents import sample_data
 
 from rich.console import Console
 
@@ -37,22 +38,22 @@ else:
 
 
 # Create a sample CSV file with 10 records
-def create_sample_csv(
-    file_path: str = CSV_FILE_DATA,
-):
-    """
-    Create a sample CSV file with 10 records containing id, document, and metadata columns.
-    The metadata column contains a JSON string representing metadata used by ChromaDB.
-    """
+# def create_sample_csv(
+#     file_path: str = CSV_FILE_DATA,
+# ):
+#     """
+#     Create a sample CSV file with 10 records containing id, document, and metadata columns.
+#     The metadata column contains a JSON string representing metadata used by ChromaDB.
+#     """
 
-    with open(file_path, "w", newline="", encoding="utf-8") as csvfile:
-        fieldnames = ["id", "document", "metadata"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(sample_data)
+#     with open(file_path, "w", newline="", encoding="utf-8") as csvfile:
+#         fieldnames = ["id", "document", "metadata"]
+#         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+#         writer.writeheader()
+#         writer.writerows(sample_data)
 
-    print(f"Sample CSV created at {file_path}")
-    return file_path
+#     print(f"Sample CSV created at {file_path}")
+#     return file_path
 
 
 def load_csv_to_chromadb(csv_file: str, collection_name: str = COLLECTION_NAME):
@@ -167,7 +168,8 @@ def query_example(
 
 if __name__ == "__main__":
     # Create sample CSV file
-    csv_file = create_sample_csv()
+    # csv_file = create_sample_csv()
+    csv_file = CSV_FILE_DATA
 
     # Load data into ChromaDB
     collection = load_csv_to_chromadb(csv_file)

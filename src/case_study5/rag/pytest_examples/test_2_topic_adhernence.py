@@ -2,7 +2,7 @@
 # uv run pytest -vs .\src\case_study5\rag\pytest_examples\test_2_topic_adhernence.py
 import os
 import pytest
-from ragas import  MultiTurnSample
+from ragas import MultiTurnSample
 from ragas.messages import HumanMessage, AIMessage
 from ragas.metrics import TopicAdherenceScore
 from langchain_openai import ChatOpenAI
@@ -49,17 +49,27 @@ async def test_topicAdherence(llm_wrapper, getData):
 
 @pytest.fixture
 def getData():
-  
-    conversation = [
-        HumanMessage(content="how many articles are there in the selenium webdriver python course?"),
-        AIMessage(content="There are 23 articles in the Selenium WebDriver Python course."),
-        HumanMessage(content="How many downloadable resources are there in this course?"),
-        AIMessage(content="There are 9 downloadable resources in the course.")
 
+    conversation = [
+        HumanMessage(content="What is Langgraph?"),
+        AIMessage(
+            content="LangGraph is a library for building stateful, multi-actor applications with Large Language Models (LLMs), built on top of LangChain. It's designed to create complex, graph-based workflows where different components can interact and maintain state across multiple steps."
+        ),
+        HumanMessage(content="What are its key features?"),
+        AIMessage(
+            content="""            Key Features
+            Graph-based Architecture: LangGraph represents your application as a directed graph where nodes are functions (often LLM calls or other operations) and edges define the flow between them.
+            State Management: Unlike simple chains, LangGraph maintains state that persists across the entire workflow, allowing for complex multi-step reasoning and decision-making.."""
+        ),
     ]
-    reference = [""" 
-    The AI should:
-    1. Give results related to the selenium webdriver python course
-    2. There are 23 articles and 9 downloadable resources in the course"""]
+    reference = [
+        """ 
+    Facts about Langgraph:
+    LangGraph is a library for building stateful, multi-actor applications with Large Language Models (LLMs), built on top of LangChain. It's designed to create complex, graph-based workflows where different components can interact and maintain state across multiple steps.
+    Key Features
+    Graph-based Architecture: LangGraph represents your application as a directed graph where nodes are functions (often LLM calls or other operations) and edges define the flow between them.
+    State Management: Unlike simple chains, LangGraph maintains state that persists across the entire workflow, allowing for complex multi-step reasoning and decision-making.
+    """
+    ]
     sample = MultiTurnSample(user_input=conversation, reference_topics=reference)
     return sample

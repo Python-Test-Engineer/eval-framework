@@ -3,7 +3,7 @@
 import os
 
 import pytest
-import requests
+
 from langchain_openai import ChatOpenAI
 from ragas import SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
@@ -35,21 +35,20 @@ async def test_context_precision():
 
     langchain_llm = LangchainLLMWrapper(llm)
     context_precision = LLMContextPrecisionWithoutReference(llm=langchain_llm)
-    question = "How many articles are there in the Selenium webdriver python course?"
+    question = "What is Langgraph?"
     # Feed data -
-    responseDict = requests.post(
-        "https://rahulshettyacademy.com/rag-llm/ask",
-        json={"question": question, "chat_history": []},
-    ).json()
-    print(responseDict)
+    # responseDict = requests.post(
+    #     "https://rahulshettyacademy.com/rag-llm/ask",
+    #     json={"question": question, "chat_history": []},
+    # ).json()
+    # print(responseDict)
 
     sample = SingleTurnSample(
         user_input=question,
-        response=responseDict["answer"],
+        response="""LangGraph is a library for building stateful, multi-actor applications with Large Language Models (LLMs), built on top of LangChain. It uses a finite state machine approach.""",
         retrieved_contexts=[
-            responseDict["retrieved_docs"][0]["page_content"],
-            responseDict["retrieved_docs"][1]["page_content"],
-            responseDict["retrieved_docs"][2]["page_content"],
+            """LangGraph is a library for building stateful, multi-actor applications with Large Language Models (LLMs), built on top of LangChain. It uses a finite state machine approach.
+            """
         ],
     )
 
