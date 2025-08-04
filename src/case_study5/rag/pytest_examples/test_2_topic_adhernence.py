@@ -39,6 +39,8 @@ def llm_wrapper(llm=PROVIDER):
     return llm
 
 
+# we use asyncio just in case we use async functions like requests...
+# we can also use sync functions and not use the decorator for asyncio.
 @pytest.mark.asyncio
 async def test_topicAdherence(llm_wrapper, getData):
     topicScore = TopicAdherenceScore(llm=llm_wrapper)

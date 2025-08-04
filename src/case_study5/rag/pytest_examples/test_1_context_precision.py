@@ -29,6 +29,8 @@ llm = ChatGroq(
 llm = ChatOpenAI(model=MODEL, temperature=0)
 
 
+# we use asyncio just in case we use async functions like requests...
+# we can also use sync functions and not use the decorator for asyncio.
 @pytest.mark.asyncio
 async def test_context_precision():
     # create object of class for that specific metric
