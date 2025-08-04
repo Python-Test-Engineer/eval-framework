@@ -23,6 +23,7 @@ COLLECTION_NAME = f"reports_{randint(1000, 9999)}"
 NUM_RESULTS = 1
 CSV_FILE_DATA = "./src/case_study5/rag/chromadb_rag/05.2_collection.csv"
 CSV_RESULTS = "./src/case_study5/rag/chromadb_rag/05.3_results.csv"
+CSV_QUESTIONS = "./src/case_study5/rag/chromadb_rag/05.0_questions.csv"
 
 client = chromadb.PersistentClient(path=PATH)
 
@@ -171,19 +172,22 @@ if __name__ == "__main__":
     # Load data into ChromaDB
     collection = load_csv_to_chromadb(csv_file)
     list_questions = [
-        "What was the climate change about last year?",
-        "Why was food price volatility so high?",
-        "What does CRISPR-Cas9 enable?",
-        "Optimise self driving?",
+        # "What was the climate change about last year?",
+        # "Why was food price volatility so high?",
+        # "What does CRISPR-Cas9 enable?",
+        # "Optimise self driving?",
     ]
-    # query_text = "What was the climate change about last year?"
-    # query_text = "Why was food price volatility so high?"
-    # query_text = "What does CRISPR-Cas9 enable?"
-    # query_text = "Optimise self driving?"
+
+    with open(CSV_QUESTIONS, "r") as f:
+        for line in f:
+            list_questions.append(line.strip())
+            
+   
     with open(CSV_RESULTS, "a") as f:
         # RAGAS uses question and contexts
         # We will add answer and ground_truth columns to complete RAGAS input requirements
         f.write("id|question|contexts|metadata\n")
+
     for i, query_text in enumerate(list_questions):
         console.print(f"\n[green bold]Query Text: {query_text}[/]")
         query_example(collection, query_text=query_text)
