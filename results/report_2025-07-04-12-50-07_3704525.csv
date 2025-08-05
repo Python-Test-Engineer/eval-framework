@@ -1,4 +1,0 @@
-process|test_process_alpha_data|tests/100_agentic/test_openai_agent.py::TestSimpleAgent::test_process_alpha_data|PASSED|3.574872|
-handle|test_handle_beta_information|tests/100_agentic/test_openai_agent.py::TestSimpleAgent::test_handle_beta_information|PASSED|2.118484|
-work|test_work_with_gamma_values|tests/100_agentic/test_openai_agent.py::TestSimpleAgent::test_work_with_gamma_values|PASSED|1.630643|
-random|test_random_input|tests/100_agentic/test_openai_agent.py::TestSimpleAgent::test_random_input|PASSED|1.301221|

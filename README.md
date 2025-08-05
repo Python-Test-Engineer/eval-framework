@@ -19,3 +19,12 @@ Then `uv sync`.
 
 `uv run uv_test.py`
 
+
+## Tests
+
+If you want to run all the template tests in the `tests` folder:
+
+To run all tests, `uv run pytest -vs  --tb=no`. We use `--tb=no` as this supresses tracback which can be quite long in purposely designed error tests.
+
+There are 3 purposely failed tests for demo purposes.
+
