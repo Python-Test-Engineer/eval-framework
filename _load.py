@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv, find_dotenv
 from rich.console import Console
+from openai import OpenAI
 
 console = Console()
 
@@ -26,17 +27,22 @@ def get_llm_client(llm_choice):
 
 
 LLM_CHOICE = "OPENAI"
-LLM_CHOICE = "GROQ"
+# LLM_CHOICE = "GROQ"
 
 if OPENAI_API_KEY:
-    print(f"OPENAI_API_KEY exists and begins {OPENAI_API_KEY[:14]}...")
+    console.print(
+        f"[green]✅ OPENAI_API_KEY exists and begins {OPENAI_API_KEY[:14]}...[/]"
+    )
 else:
-    print("OPENAI_API_KEY not set")
+    console.print("[red bold]❌ OPENAI_API_KEY not set[/]")
 
 if GROQ_API_KEY:
-    print(f"GROQ_API_KEY exists and begins {GROQ_API_KEY[:14]}...")
+    console.print(
+        f"[green]✅ GROQ_API_KEY exists and begins {GROQ_API_KEY[:14]}...[/]"
+    )
+
 else:
-    print("GROQ_API_KEY not set")
+    console.print("[red bold]❌ GROQ_API_KEY not set[/]")
 
 
 client = get_llm_client(LLM_CHOICE)
@@ -45,5 +51,4 @@ if LLM_CHOICE == "GROQ":
 else:
     MODEL = "gpt-4o-mini"
 
-print(f"LLM_CHOICE: {LLM_CHOICE} - MODEL: {MODEL}")
-
+console.print(f"[green]✅ LLM_CHOICE: {LLM_CHOICE} - MODEL: {MODEL}[/]")
