@@ -9,7 +9,11 @@ import time
 from datetime import datetime
 from pathlib import Path
 from rich.console import Console
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv(), override=True)
+
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 console = Console()
 
 

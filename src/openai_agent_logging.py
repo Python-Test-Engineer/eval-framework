@@ -1,13 +1,15 @@
 """A demo fo a simple routing agent with a logging decorator that can be turned on or off."""
 
 import functools
+import os
 import json
 from openai import OpenAI
-
+from dotenv import load_dotenv, find_dotenv
 from rich.console import Console
 
 console = Console()
-
+load_dotenv(find_dotenv(), override=True)
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
 console.print(
     "\n[cyan bold]A basic routing agent with a logging decorator with on/off.[/]"

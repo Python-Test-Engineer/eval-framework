@@ -38,7 +38,7 @@ def llm_wrapper(llm=PROVIDER):
 
 
 @pytest.mark.asyncio
-async def test_rubric_score(llm_wrapper):
+async def test_083_rubric_score(llm_wrapper):
     sample = SingleTurnSample(
         user_input="Where is the Eiffel Tower located?",
         response="The Eiffel Tower is located in Paris.",

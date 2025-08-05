@@ -18,3 +18,7 @@ tool_a|('Process this alpha data',)|{}|Tool A processed: Process this alpha data
 tool_b|('Handle beta information',)|{}|Tool B processed: Handle beta information|
 tool_c|('Work with gamma values',)|{}|Tool C processed: Work with gamma values|
 tool_a|('Random input',)|{}|Tool A processed: Random input|
+tool_a|('Process this alpha data',)|{}|Tool A processed: Process this alpha data|
+tool_b|('Handle beta information',)|{}|Tool B processed: Handle beta information|
+tool_c|('Work with gamma values',)|{}|Tool C processed: Work with gamma values|
+tool_a|('Random input',)|{}|Tool A processed: Random input|
