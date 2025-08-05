@@ -126,7 +126,6 @@ def get_score_description(score_number):
     return score_map.get(score_number, None)
 
 
-# Example usage for console output:
 def format_result_output(result):
     score_desc = get_score_description(result)
     if score_desc:
