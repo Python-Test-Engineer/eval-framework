@@ -27,20 +27,20 @@ def get_time_now():
 def get_weather(location: str):
     """Call to get the current weather."""
     if location.lower() in ["munich"]:
-        return "-It's 10 degrees Celsius and cold."
+        return "~It's 10 degrees Celsius and cold."
     else:
-        return "-It's 40 degrees Celsius and sunny."
+        return "~It's 40 degrees Celsius and sunny."
 
 
 @tool
 def check_seating_availability(location: str, seating_type: str):
     """Call to check seating availability."""
     if location.lower() == "munich" and seating_type.lower() == "outdoor":
-        return "-Yes, we still have seats available outdoors."
+        return "~Yes, we still have seats available outdoors."
     elif location.lower() == "munich" and seating_type.lower() == "indoor":
-        return "-Yes, we have indoor seating available."
+        return "~Yes, we have indoor seating available."
     else:
-        return "-Sorry, seating information for this location is unavailable."
+        return "~Sorry, seating information for this location is unavailable."
 
 
 @tool
@@ -48,16 +48,16 @@ def convert_c_to_f(centigrade: float, fahrenheit: float) -> float:
     """Given a temperature in Celsius, convert it to Fahrenheit.
     Uses the formula: °F = (°C × 1.8) + 32"""
     if centigrade is not None:
-        result = (centigrade * 1.8) + 32
+        result = "~" + str((centigrade * 1.8) + 32)
 
         return result
     else:
-        return "Sorry, I am unable to calculate the temperature."
+        return "~Sorry, I am unable to calculate the temperature."
 
 
 @tool
 def describe_fahrenheit_with_label(temperature: float) -> str:
-    """Given a temperature in Fahrenheit, convert it to a lable of either COLD, MILD, WARM or HOT."""
+    """Given a temperature in Fahrenheit, describe it as COLD, MILD, WARM or HOT."""
 
     if temperature < 45:
         return "~COLD"
@@ -67,6 +67,8 @@ def describe_fahrenheit_with_label(temperature: float) -> str:
         return "~WARM"
     elif temperature < 100:
         return "~HOT"
+    elif temperature > 100:
+        return "~ULTRA_HOT"
     else:
         return "~NONE"
 
@@ -113,7 +115,12 @@ Q4 = """
 What is 35 centigrade in fahrenheit? What is the label for this temperature? Please order food for this temperature."""
 Q5 = """ It is 45 centigrade. Calculate the temperature in fahrenheit. What is the label for this temperature? What food do I order?."""
 Q6 = """
-what is the weather in munich? It is HOT. What food do I order? """
+Describe 45 Centrigrade?
+It is HOT. What food do I order? 
+what is the weather in munich? 
+What is 45 centigrade in fahrenheit?
+
+"""
 
 run_id = str(uuid4())
 messages = [HumanMessage(Q6)]
