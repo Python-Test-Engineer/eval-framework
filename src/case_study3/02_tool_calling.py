@@ -115,7 +115,7 @@ Q4 = """
 What is 35 centigrade in fahrenheit? What is the label for this temperature? Please order food for this temperature."""
 Q5 = """ It is 45 centigrade. Calculate the temperature in fahrenheit. What is the label for this temperature? What food do I order?."""
 Q6 = """
-Describe 45 Centrigrade?
+Describe 45 Centrigrade and what food should I get?
 It is HOT. What food do I order? 
 what is the weather in munich? 
 What is 45 centigrade in fahrenheit?
