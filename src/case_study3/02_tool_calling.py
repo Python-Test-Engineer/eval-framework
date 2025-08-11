@@ -75,7 +75,16 @@ def describe_fahrenheit_with_label(temperature: float) -> str:
 def order_food(temp_desc: str) -> str:
     """The food to order for a given temperature description. Use this tool if the user wants to order some food or to pick a type of food needed."""
     console.print(f"[cyan bold]<debug>temp_desc: {temp_desc}[/]")
-    food = "~TASTY_FOOD"
+    if "COLD" in temp_desc:
+        food = "~COLD_FOOD"
+    elif "MILD" in temp_desc:
+        food = "~MILD_FOOD"
+    elif "WARM" in temp_desc:
+        food = "~WARM_FOOD"
+    elif "HOT" in temp_desc:
+        food = "~HOT_FOOD"
+    else:
+        food = "~NONE"
 
     console.print(f"[cyan bold]<debug>TOOL ORDER_FOOD: {food}[/]")
     return food
@@ -102,14 +111,13 @@ What is 22 centigrade in fahrenheit? What is the label for this temperature?"""
 
 Q4 = """
 What is 35 centigrade in fahrenheit? What is the label for this temperature? Please order food for this temperature."""
-Q5 = """
-I want to order food. It is 45 centigrade. Please tell me what food to order."""
+Q5 = """ It is 45 centigrade. Calculate the temperature in fahrenheit. What is the label for this temperature? What food do I order?."""
 Q6 = """
-It is COLD. What food do I order?"""
+what is the weather in munich? It is HOT. What food do I order? """
 
 run_id = str(uuid4())
-messages = [HumanMessage(Q5)]
-# messages = [HumanMessage(Q6)]
+messages = [HumanMessage(Q6)]
+# messages = [HumanMessage(Q5)]
 
 
 console.print("[green]Starting...[/]")
@@ -150,18 +158,14 @@ except Exception:
     console.print("[red]❌ Error during LLM call: [/]")
 
 for message in messages:
-    if (
-        isinstance(message, ToolMessage)
-        or isinstance(message, HumanMessage)
-        or isinstance(message, AIMessage)
-    ):
-        # console.print(f"Message Type: {message.type}")
-        # console.print(f"Message: {message.content}")
-        if message.type == "tool":
-            OUTPUT += message.content
-        if message.type == "human":
-            INPUT += message.content
-            INPUT = INPUT.replace("\n", "").replace("  ", " ").strip()
+
+    # console.print(f"Message Type: {message.type}")
+    # console.print(f"Message: {message.content}")
+    if message.type == "tool":
+        OUTPUT += message.content
+    if message.type == "human":
+        INPUT += message.content
+        INPUT = INPUT.replace("\n", "").replace("  ", " ").strip()
 
 
 #################### EVALS01 ####################
