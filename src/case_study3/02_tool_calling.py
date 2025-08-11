@@ -3,7 +3,7 @@
 import os
 from datetime import datetime
 from uuid import uuid4
-from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.messages import HumanMessage, ToolMessage, AIMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 from rich.console import Console
@@ -27,20 +27,20 @@ def get_time_now():
 def get_weather(location: str):
     """Call to get the current weather."""
     if location.lower() in ["munich"]:
-        return "It's 10 degrees Celsius and cold."
+        return "-It's 10 degrees Celsius and cold."
     else:
-        return "It's 40 degrees Celsius and sunny."
+        return "-It's 40 degrees Celsius and sunny."
 
 
 @tool
 def check_seating_availability(location: str, seating_type: str):
     """Call to check seating availability."""
     if location.lower() == "munich" and seating_type.lower() == "outdoor":
-        return "Yes, we still have seats available outdoors."
+        return "-Yes, we still have seats available outdoors."
     elif location.lower() == "munich" and seating_type.lower() == "indoor":
-        return "Yes, we have indoor seating available."
+        return "-Yes, we have indoor seating available."
     else:
-        return "Sorry, seating information for this location is unavailable."
+        return "-Sorry, seating information for this location is unavailable."
 
 
 @tool
@@ -48,7 +48,9 @@ def convert_c_to_f(centigrade: float, fahrenheit: float) -> float:
     """Given a temperature in Celsius, convert it to Fahrenheit.
     Uses the formula: °F = (°C × 1.8) + 32"""
     if centigrade is not None:
-        return (centigrade * 1.8) + 32
+        result = (centigrade * 1.8) + 32
+
+        return result
     else:
         return "Sorry, I am unable to calculate the temperature."
 
@@ -58,36 +60,25 @@ def describe_fahrenheit_with_label(temperature: float) -> str:
     """Given a temperature in Fahrenheit, convert it to a lable of either COLD, MILD, WARM or HOT."""
 
     if temperature < 45:
-        return "|COLD"
+        return "~COLD"
     elif temperature < 65:
-        return "|MILD"
+        return "~MILD"
     elif temperature < 75:
-        return "|WARM"
+        return "~WARM"
     elif temperature < 100:
-        return "|HOT"
+        return "~HOT"
     else:
-        return "|NONE"
+        return "~NONE"
 
 
 @tool
 def order_food(temp_desc: str) -> str:
     """The food to order for a given temperature description. Use this tool if the user wants to order some food or to pick a type of food needed."""
     console.print(f"[cyan bold]<debug>temp_desc: {temp_desc}[/]")
-    try:
-        if temp_desc == "COLD":
-            food = "spicy_food"
-        elif temp_desc == "MILD":
-            food = "hot soup"
-        elif temp_desc == "WARM":
-            food = "cold_drink"
-        elif temp_desc == "HOT":
-            food = "iced_drink"
-        else:
-            food = "none"
-    except Exception as e:
-        console.print(f"[red]❌ Error during tool call: {e}[/]")
+    food = "~TASTY_FOOD"
+
     console.print(f"[cyan bold]<debug>TOOL ORDER_FOOD: {food}[/]")
-    return console.print(f"[purple]RETURN ORDER_FOOD: {food}")
+    return food
 
 
 tools = [
@@ -104,7 +95,7 @@ Q1 = """
 How will the weather be in munich today? Do you still have indoor seats available?
 """
 Q2 = """
-What is 32 centigrade in fahrenheit?
+What is 32 centigrade in fahrenheit and its label? What is the weather? 
 """
 Q3 = """
 What is 22 centigrade in fahrenheit? What is the label for this temperature?"""
@@ -114,11 +105,11 @@ What is 35 centigrade in fahrenheit? What is the label for this temperature? Ple
 Q5 = """
 I want to order food. It is 45 centigrade. Please tell me what food to order."""
 Q6 = """
-It is HOT. What food do I order?"""
+It is COLD. What food do I order?"""
 
 run_id = str(uuid4())
-# messages = [HumanMessage(Q5)]
-messages = [HumanMessage(Q3)]
+messages = [HumanMessage(Q5)]
+# messages = [HumanMessage(Q6)]
 
 
 console.print("[green]Starting...[/]")
@@ -137,26 +128,33 @@ tool_mapping = {
 
 tools_called = ":".join([tool_call["name"] for tool_call in llm_output.tool_calls])
 for tool_call in llm_output.tool_calls:
-    tool = tool_mapping[tool_call["name"].lower()]
-    tool_id = tool_call["id"]
-    tool_output = tool.invoke(tool_call["args"])
     try:
         if tool_call["id"]:
+            tool = tool_mapping[tool_call["name"].lower()]
+            tool_id = tool_call["id"]
+            tool_output = tool.invoke(tool_call["args"])
             print(
-                f"Tool called: {tool_call['name'].lower()} with args: {tool_call['args']}"
+                f"Tool called: {tool_call['name'].lower()} with args: {tool_call['args']} and OUTPUT: {tool_output}"
             )
 
             messages.append(ToolMessage(tool_output, tool_call_id=tool_call["id"]))
-    except Exception as e:
-        pass
+    except Exception:
+        console.print(f"[red]❌ Error during tool call: [/]")
 
 
 INPUT = ""
 OUTPUT = ""
+try:
+    llm_with_tools.invoke(messages)
+except Exception:
+    console.print("[red]❌ Error during LLM call: [/]")
 
-llm_with_tools.invoke(messages)
 for message in messages:
-    if isinstance(message, ToolMessage) or isinstance(message, HumanMessage):
+    if (
+        isinstance(message, ToolMessage)
+        or isinstance(message, HumanMessage)
+        or isinstance(message, AIMessage)
+    ):
         # console.print(f"Message Type: {message.type}")
         # console.print(f"Message: {message.content}")
         if message.type == "tool":
