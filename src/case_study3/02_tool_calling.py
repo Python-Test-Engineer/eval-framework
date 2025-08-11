@@ -182,4 +182,4 @@ console.print(log)
 with open(f"{OUTPUT_DIR}/02_tool_calling.csv", "a") as f:
     f.write(f"{log}\n")
 #################################################
-console.print(f"\n[green]Done! Logged to {OUTPUT_DIR}/01_tool_calling.csv[/]")
+console.print(f"\n[green]Done! Logged to {OUTPUT_DIR}/02_tool_calling.csv[/]")
