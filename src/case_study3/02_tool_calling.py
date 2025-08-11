@@ -2,7 +2,7 @@
 
 import os
 from datetime import datetime
-
+from uuid import uuid4
 from langchain_core.messages import HumanMessage, ToolMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
@@ -56,7 +56,7 @@ def convert_c_to_f(centigrade: float, fahrenheit: float) -> float:
 @tool
 def describe_fahrenheit_with_label(temperature: float) -> str:
     """Given a temperature in Fahrenheit, convert it to a lable of either COLD, MILD, WARM or HOT."""
-    # this has leading | so that the output is easier to parse as we get 85|HOT in the output
+
     if temperature < 45:
         return "|COLD"
     elif temperature < 65:
@@ -71,17 +71,21 @@ def describe_fahrenheit_with_label(temperature: float) -> str:
 
 @tool
 def order_food(temp_desc: str) -> str:
-    """Given a described temperature in text, order food based on the label."""
-    if temp_desc == "COLD":
-        food = "spicy_food"
-    elif temp_desc == "MILD":
-        food = "hot soup"
-    elif temp_desc == "WARM":
-        food = "cold_drink"
-    elif temp_desc == "HOT":
-        food = "iced_drink"
-    else:
-        food = "none"
+    """The food to order for a given temperature description. Use this tool if the user wants to order some food or to pick a type of food needed."""
+    console.print(f"[cyan bold]<debug>temp_desc: {temp_desc}[/]")
+    try:
+        if temp_desc == "COLD":
+            food = "spicy_food"
+        elif temp_desc == "MILD":
+            food = "hot soup"
+        elif temp_desc == "WARM":
+            food = "cold_drink"
+        elif temp_desc == "HOT":
+            food = "iced_drink"
+        else:
+            food = "none"
+    except Exception as e:
+        console.print(f"[red]❌ Error during tool call: {e}[/]")
     console.print(f"[cyan bold]<debug>TOOL ORDER_FOOD: {food}[/]")
     return console.print(f"[purple]RETURN ORDER_FOOD: {food}")
 
@@ -103,17 +107,22 @@ Q2 = """
 What is 32 centigrade in fahrenheit?
 """
 Q3 = """
-What is 15 centigrade in fahrenheit? What is the label for this temperature?"""
+What is 22 centigrade in fahrenheit? What is the label for this temperature?"""
 
 Q4 = """
-It is 15 centigrade. Please order food for this temperature."""
+What is 35 centigrade in fahrenheit? What is the label for this temperature? Please order food for this temperature."""
+Q5 = """
+I want to order food. It is 45 centigrade. Please tell me what food to order."""
+Q6 = """
+It is HOT. What food do I order?"""
 
-
-messages = [HumanMessage(Q4)]
-# messages = [HumanMessage(Q2)]
+run_id = str(uuid4())
+# messages = [HumanMessage(Q5)]
+messages = [HumanMessage(Q3)]
 
 
 console.print("[green]Starting...[/]")
+console.print(f"[green]{messages}[/]")
 llm_output = llm_with_tools.invoke(messages)
 messages.append(llm_output)
 
@@ -125,12 +134,21 @@ tool_mapping = {
     "order_food": order_food,
 }
 
-tools_called = llm_output.tool_calls
 
+tools_called = ":".join([tool_call["name"] for tool_call in llm_output.tool_calls])
 for tool_call in llm_output.tool_calls:
     tool = tool_mapping[tool_call["name"].lower()]
+    tool_id = tool_call["id"]
     tool_output = tool.invoke(tool_call["args"])
-    messages.append(ToolMessage(tool_output, tool_call_id=tool_call["id"]))
+    try:
+        if tool_call["id"]:
+            print(
+                f"Tool called: {tool_call['name'].lower()} with args: {tool_call['args']}"
+            )
+
+            messages.append(ToolMessage(tool_output, tool_call_id=tool_call["id"]))
+    except Exception as e:
+        pass
 
 
 INPUT = ""
@@ -139,8 +157,8 @@ OUTPUT = ""
 llm_with_tools.invoke(messages)
 for message in messages:
     if isinstance(message, ToolMessage) or isinstance(message, HumanMessage):
-        console.print(f"Message Type: {message.type}")
-        console.print(f"Message: {message.content}")
+        # console.print(f"Message Type: {message.type}")
+        # console.print(f"Message: {message.content}")
         if message.type == "tool":
             OUTPUT += message.content
         if message.type == "human":
@@ -149,9 +167,10 @@ for message in messages:
 
 
 #################### EVALS01 ####################
-log = f"{get_time_now()}|TOOL_CALLING|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{tools_called}"
+print("\nEVALS01\n")
+log = f"{run_id}|{get_time_now()}|TOOL_CALLING|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{tools_called}|"
 console.print(log)
 with open(f"{OUTPUT_DIR}/02_tool_calling.csv", "a") as f:
     f.write(f"{log}\n")
 #################################################
-console.print(f"[green]Done! Logged to {OUTPUT_DIR}/01_tool_calling.csv[/]")
+console.print(f"\n[green]Done! Logged to {OUTPUT_DIR}/01_tool_calling.csv[/]")

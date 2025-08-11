@@ -61,18 +61,13 @@ tools_called = ""
 
 console.print("[green]Starting...[/]")
 
-result = llm_with_tools.invoke("How will the weather be in munich today?")
-result = llm_with_tools.invoke(
-    "How will the weather be in munich today? Do you still have seats indoors available?"
-)
 
-tools_called = result.tool_calls
 messages = [
     HumanMessage(
         "How will the weather be in munich today? Do you still have seats outdoor available?"
     )
 ]
-messages = [HumanMessage("What is 32 centigrade in fahrenheit?")]
+# messages = [HumanMessage("What is 32 centigrade in fahrenheit?")]
 llm_output = llm_with_tools.invoke(messages)
 messages.append(llm_output)
 
@@ -82,8 +77,8 @@ tool_mapping = {
     "convert_c_to_f": convert_c_to_f,
 }
 
-llm_output.tool_calls
 
+tools_called = ":".join([tool_call["name"] for tool_call in llm_output.tool_calls])
 for tool_call in llm_output.tool_calls:
     tool = tool_mapping[tool_call["name"].lower()]
     tool_output = tool.invoke(tool_call["args"])
@@ -100,13 +95,14 @@ for message in messages:
         console.print(f"Message: {message.content}")
         if message.type == "tool":
             OUTPUT += message.content
+            console.print(f"[green]Answer: {message.content}[/]")
         if message.type == "human":
             INPUT += message.content
             INPUT = INPUT.replace("\n", "").replace("  ", " ").strip()
 
 
 #################### EVALS01 ####################
-log = f"{get_time_now()}|TOOL_CALLING|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{tools_called}"
+log = f"{get_time_now()}|TOOL_CALLING|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{tools_called}|"
 console.print(log)
 with open(f"{OUTPUT_DIR}/01_tool_calling.csv", "a") as f:
     f.write(f"{log}\n")
