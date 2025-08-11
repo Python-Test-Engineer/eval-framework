@@ -110,6 +110,7 @@ It is 15 centigrade. Please order food for this temperature."""
 
 
 messages = [HumanMessage(Q4)]
+# messages = [HumanMessage(Q2)]
 
 
 console.print("[green]Starting...[/]")
