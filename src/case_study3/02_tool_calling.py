@@ -69,11 +69,29 @@ def describe_fahrenheit_with_label(temperature: float) -> str:
         return "|NONE"
 
 
+@tool
+def order_food(temp_desc: str) -> str:
+    """Given a described temperature in text, order food based on the label."""
+    if temp_desc == "COLD":
+        food = "spicy_food"
+    elif temp_desc == "MILD":
+        food = "hot soup"
+    elif temp_desc == "WARM":
+        food = "cold_drink"
+    elif temp_desc == "HOT":
+        food = "iced_drink"
+    else:
+        food = "none"
+    console.print(f"[cyan bold]<debug>TOOL ORDER_FOOD: {food}[/]")
+    return console.print(f"[purple]RETURN ORDER_FOOD: {food}")
+
+
 tools = [
     get_weather,
     check_seating_availability,
     convert_c_to_f,
     describe_fahrenheit_with_label,
+    order_food,
 ]
 llm_with_tools = llm.bind_tools(tools)
 tools_called = ""
@@ -86,7 +104,12 @@ What is 32 centigrade in fahrenheit?
 """
 Q3 = """
 What is 15 centigrade in fahrenheit? What is the label for this temperature?"""
-messages = [HumanMessage(Q3)]
+
+Q4 = """
+It is 15 centigrade. Please order food for this temperature."""
+
+
+messages = [HumanMessage(Q4)]
 
 
 console.print("[green]Starting...[/]")
@@ -98,6 +121,7 @@ tool_mapping = {
     "check_seating_availability": check_seating_availability,
     "convert_c_to_f": convert_c_to_f,
     "describe_fahrenheit_with_label": describe_fahrenheit_with_label,
+    "order_food": order_food,
 }
 
 tools_called = llm_output.tool_calls
