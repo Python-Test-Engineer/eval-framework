@@ -71,33 +71,12 @@ def describe_fahrenheit_with_label(temperature: float) -> str:
         return "~ULTRA_HOT"
     else:
         return "~NONE"
-
-
-@tool
-def order_food(temp_desc: str) -> str:
-    """The food to order for a given temperature description. Use this tool if the user wants to order some food or to pick a type of food needed."""
-    console.print(f"[cyan bold]<debug>temp_desc: {temp_desc}[/]")
-    if "COLD" in temp_desc:
-        food = "~COLD_FOOD"
-    elif "MILD" in temp_desc:
-        food = "~MILD_FOOD"
-    elif "WARM" in temp_desc:
-        food = "~WARM_FOOD"
-    elif "HOT" in temp_desc:
-        food = "~HOT_FOOD"
-    else:
-        food = "~NONE"
-
-    console.print(f"[cyan bold]<debug>TOOL ORDER_FOOD: {food}[/]")
-    return food
-
-
+    
 tools = [
     get_weather,
     check_seating_availability,
     convert_c_to_f,
     describe_fahrenheit_with_label,
-    order_food,
 ]
 llm_with_tools = llm.bind_tools(tools)
 tools_called = ""
@@ -106,25 +85,24 @@ Q1 = """
 How will the weather be in munich today? Do you still have indoor seats available?
 """
 Q2 = """
-What is 32 centigrade in fahrenheit and its label? What is the weather? 
+What is 32 centigrade in fahrenheit and its label?
 """
 Q3 = """
-What is 22 centigrade in fahrenheit? What is the label for this temperature?"""
-
+What is 10 centigrade in fahrenheit and its label?
+"""
 Q4 = """
-What is 35 centigrade in fahrenheit? What is the label for this temperature? Please order food for this temperature."""
+What is 35 centigrade in fahrenheit? What is the label for this temperature? """
 Q5 = """ It is 45 centigrade. Calculate the temperature in fahrenheit. What is the label for this temperature? What food do I order?."""
 Q6 = """
-Describe 45 Centrigrade and what food should I get?
-It is HOT. What food do I order? 
-what is the weather in munich? 
-What is 45 centigrade in fahrenheit?
+Describe 1 Centrigrade~
+what is the weather in munich?~
+What is 45 centigrade in fahrenheit?~
 
 """
 
 run_id = str(uuid4())
-messages = [HumanMessage(Q6)]
-# messages = [HumanMessage(Q5)]
+# messages = [HumanMessage(Q6)]
+messages = [HumanMessage(Q3)]
 
 
 console.print("[green]Starting...[/]")
@@ -137,7 +115,7 @@ tool_mapping = {
     "check_seating_availability": check_seating_availability,
     "convert_c_to_f": convert_c_to_f,
     "describe_fahrenheit_with_label": describe_fahrenheit_with_label,
-    "order_food": order_food,
+
 }
 
 
