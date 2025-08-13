@@ -31,7 +31,7 @@ def get_weather(location: str):
     """Call to get the current weather."""
     console.print(f"[cyan bold]<debug>get_weather: {location}[/]")
     global DEBUG
-    DEBUG += f"<debug>get_weather: {location}"
+    DEBUG += f"<debug>get_weather: {location}</debug>"
     if location.lower() in ["munich"]:
         return "~It's 10 degrees Celsius and cold."
     else:
@@ -45,7 +45,7 @@ def check_seating_availability(location: str, seating_type: str):
         f"[cyan bold]<debug>check_seating_availability: {location}, {seating_type}[/]"
     )
     global DEBUG
-    DEBUG += f"<debug>check_seating_availability: {location}, {seating_type}"
+    DEBUG += f"<debug>check_seating_availability: {location}, {seating_type}</debug>"
     if location.lower() == "munich" and seating_type.lower() == "outdoor":
         return "~Yes, we still have seats available outdoors."
     elif location.lower() == "munich" and seating_type.lower() == "indoor":
@@ -60,7 +60,7 @@ def convert_c_to_f(centigrade: float) -> float:
     Uses the formula: °F = (°C × 1.8) + 32"""
     console.print(f"[cyan bold]<debug>convert_c_to_f: {centigrade}[/]")
     global DEBUG
-    DEBUG += f"<debug>convert_c_to_f: {centigrade}"
+    DEBUG += f"<debug>convert_c_to_f: {centigrade}</debug>"
     if centigrade is not None:
         result = "~" + str((centigrade * 1.8) + 32)
         return result
@@ -73,7 +73,7 @@ def describe_fahrenheit_with_label(temperature: float) -> str:
     """Given a temperature in Fahrenheit, describe it as COLD, MILD, WARM or HOT."""
     console.print(f"[cyan bold]<debug>describe_fahrenheit_with_label: {temperature}[/]")
     global DEBUG
-    DEBUG += f"<debug>describe_fahrenheit_with_label: {temperature}"
+    DEBUG += f"<debug>describe_fahrenheit_with_label: {temperature}</debug>"
     if temperature < 45:
         return "~COLD"
     elif temperature < 65:
@@ -93,7 +93,7 @@ def order_food(temp_desc: str) -> str:
     """The food to order for a given temperature description. Use this tool if the user wants to order some food or to pick a type of food needed."""
     console.print(f"[cyan bold]<debug>temp_desc: {temp_desc}[/]")
     global DEBUG
-    DEBUG += f"<debug>temp_desc: {temp_desc}"
+    DEBUG += f"<debug>temp_desc: {temp_desc}</debug>"
     if "COLD" in temp_desc:
         food = "~HOT_FOOD"
     elif "MILD" in temp_desc:
@@ -229,7 +229,7 @@ def run_all_questions():
             OUTPUT = f"ERROR: {str(e)}"
             tools_called_str = "error"
 
-        log = f"{run_id}|{get_time_now()}|TOOL_CALLING_AGENT|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{tools_called_str}|"
+        log = f"{run_id}|{get_time_now()}|TOOL_CALLING_AGENT|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{DEBUG}|{tools_called_str}|"
 
         with open(f"{OUTPUT_DIR}/03_tool_calling_agent_all.csv", "a") as f:
             f.write(f"{log}\n")
