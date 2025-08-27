@@ -184,7 +184,15 @@ def create_workflow():
 
     # Final edge from advice to end
     workflow.add_edge("provide_advice", END)
+    app = workflow.compile()
+    # LangGraph's built-in method to generate PNG
+    png_data = app.get_graph().draw_mermaid_png()
 
+    # Save to file
+    with open("workflow_diagram.png", "wb") as f:
+        f.write(png_data)
+
+    print("✅ PNG diagram saved as 'therabot_workflow_diagram.png'")
     return workflow.compile()
 
 
