@@ -147,12 +147,12 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
     console.print(f"OUTPUT -> [green italic]binary_score: {OUTPUT}[/]")
 
     input_tokens = count_tokens(human_prompt, MODEL)
-    print(f"Estimated input tokens: {input_tokens}")
+    print(f"01 Estimated input tokens: {input_tokens}")
 
     # Count output tokens
     output_tokens = count_tokens(str(result), MODEL)
-    print(f"Estimated output tokens: {output_tokens}")
-    print(f"Estimated total tokens: {input_tokens + output_tokens}")
+    print(f"01 Estimated output tokens: {output_tokens}")
+    print(f"01 Estimated total tokens: {input_tokens + output_tokens}")
     # NOTES:
     # In reality we add a trace_id to group the evaluations together and we add a span_id to identify the individual evaluation
     #################### EVALS01 ####################
@@ -165,7 +165,7 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
         encoding="utf-8",
     ) as f:
         f.write(
-            f"{get_report_date()}|ARTICLE_WRITER|EVALUATOR|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{input_tokens}|{output_tokens}|{time_taken:.2f}\n"
+            f"{get_report_date()}|ARTICLE_WRITER|EVALUATOR|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{time_taken:.2f}\n"
         )
     ##############################################
 
