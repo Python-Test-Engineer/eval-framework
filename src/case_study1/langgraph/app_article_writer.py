@@ -205,11 +205,9 @@ def translate_article(state: AgentState) -> AgentState:
     time_taken = end - start
     print(f"Execution time: {time_taken:.2f} seconds")
     OUTPUT = result
+    
+    
     #################### EVALS02 ####################
-    #
-    # This can be standardised during development
-    # DATE|COMPONENT_CODE|MODEL|TEMPERATURE|INPUT|OUTPUT and any optional fields
-    #
     with open(
         "./src/case_study1/langgraph/02_article_writer_translate.csv",
         "a",
@@ -219,6 +217,8 @@ def translate_article(state: AgentState) -> AgentState:
             f"{get_report_date()}|ARTICLE_WRITER|TRANSLATE|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
     ##############################################
+    
+    
     state["article_state"] = result.content
     return state
 
