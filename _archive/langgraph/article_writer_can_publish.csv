@@ -1,0 +1,8 @@
+REPORT_DATE|ARTICLE_WRITER|PUBLISHER|MODEL|TEMPERATURE|INPUT|result.can_be_posted|result.meets_word_count|result.is_not_sensationalistic|result.is_language_german
+2025-07-06-17-44-07|ARTICLE_WRITER|PUBLISHER|gpt-4o-mini|0.5|Manchester United un...|yes|yes|yes|yes
+2025-07-06-17-44-25|ARTICLE_WRITER|PUBLISHER|gpt-4o-mini|0.5|Manchester United un...|no|no|yes|yes
+2025-07-06-17-44-30|ARTICLE_WRITER|PUBLISHER|gpt-4o-mini|0.5|Manchester United un...|yes|yes|yes|yes
+2025-07-06-17-44-38|ARTICLE_WRITER|PUBLISHER|gpt-4o-mini|0.5|English football is ...|no|yes|yes|no
+2025-07-06-17-45-09|ARTICLE_WRITER|PUBLISHER|gpt-4o-mini|0.5|English football is ...|no|yes|yes|no
+2025-07-06-17-45-13|ARTICLE_WRITER|PUBLISHER|gpt-4o-mini|0.5|Newcastle United, Ar...|no|no|yes|yes
+2025-07-07-23-37-12|ARTICLE_WRITER|PUBLISHER|gpt-4o-mini|0.5|Newcastle United, Ar...|no|no|yes|yes

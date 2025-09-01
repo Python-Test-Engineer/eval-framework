@@ -1,0 +1,5 @@
+timestamp|function_name|module_name|source_file|source_line|caller_file|caller_line|caller_function|pid|thread_id|execution_time|success|args|kwargs|result|error_msg
+2025-07-04T13:03:19.808285|tool_a|__main__|openai_agent_advanced_logging2.py|144|openai_agent_advanced_logging2.py|243|run|8508|20268|0.0096|True|('Process this alpha data',)|{}|Tool A processed: Process this alpha data|
+2025-07-04T13:03:20.919113|tool_b|__main__|openai_agent_advanced_logging2.py|150|openai_agent_advanced_logging2.py|243|run|8508|20268|0.0040|True|('Handle beta information',)|{}|Tool B processed: Handle beta information|
+2025-07-04T13:03:22.192259|tool_c|__main__|openai_agent_advanced_logging2.py|156|openai_agent_advanced_logging2.py|243|run|8508|20268|0.0024|True|('Work with gamma values',)|{}|Tool C processed: Work with gamma values|
+2025-07-04T13:03:24.112808|tool_a|__main__|openai_agent_advanced_logging2.py|144|openai_agent_advanced_logging2.py|243|run|8508|20268|0.0044|True|('Random input',)|{}|Tool A processed: Random input|

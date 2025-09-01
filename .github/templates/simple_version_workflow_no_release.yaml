@@ -1,0 +1,30 @@
+name: Version Management
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  version:
+    uses: Python-Test-Engineer/llm-evaluation-framework/.github/workflows/reusable_version_workflow.yaml@main
+    permissions:
+      contents: write
+    
+  # Optional: Use the outputs from the reusable workflow
+  post-version:
+    needs: version
+    runs-on: ubuntu-latest
+    if: needs.version.outputs.should_release == 'true'
+    steps:
+    - name: Show version information
+      run: |
+        echo "New version created: ${{ needs.version.outputs.new_version }}"
+        echo "Tag created: ${{ needs.version.outputs.new_tag }}"
+        echo "Increment type: ${{ needs.version.outputs.increment_type }}"
+        
+    # You can add additional steps here, such as:
+    # - Creating a GitHub release
+    # - Building and publishing packages
+    # - Sending notifications
+    # - Updating documentation

@@ -1,0 +1,6 @@
+input|output|is_correct|is_helpful|is_complete
+What is the capital of France?|The capital of France is Paris. It's been the capital since 987 AD and is home to about 2.2 million people in the city proper.|1|0|
+How do I make chocolate chip cookies?|To make chocolate chip cookies, you'll need flour, butter, sugar, eggs, vanilla, baking soda, salt, and chocolate chips. Mix the wet and dry ingredients separately, then combine and fold in chips. Bake at 375°F for 9-11 minutes.|1|1|1
+Explain quantum computing in simple terms|Quantum computing uses quantum bits (qubits) instead of regular bits. While regular bits are either 0 or 1, qubits can be both at once through superposition. This allows quantum computers to process many calculations simultaneously.|0|0|0
+What's 15 + 27?|42|0|1|1
+Write a Python function to reverse a string|def reverse_string(s):\n    return s[::-1]\n\n# Alternative method:\n# def reverse_string(s):\n#     return ''.join(reversed(s))|1|1|1

@@ -1,0 +1,162 @@
+name: Custom Version Increment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+
+jobs:
+  version-increment:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        # Fetch all history to analyze all commits since last tag
+        fetch-depth: 0
+    
+    - name: Get latest version and increment
+      id: version
+      run: |
+        # Get the latest git tag that matches semantic versioning pattern
+        # If no tags exist, start with 0.0.0
+        LATEST_TAG=$(git describe --tags --abbrev=0 --match="v[0-9]*.[0-9]*.[0-9]*" 2>/dev/null || echo "v0.0.0")
+        echo "Latest tag found: $LATEST_TAG"
+        
+        # Remove the 'v' prefix to work with pure version numbers
+        CURRENT_VERSION=${LATEST_TAG#v}
+        echo "Current version: $CURRENT_VERSION"
+        
+        # Split version into major.minor.patch components using parameter expansion
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+        echo "Parsed version - Major: $MAJOR, Minor: $MINOR, Patch: $PATCH"
+        
+        # Get all commits since the last tag
+        # If this is the first tag, get all commits
+        if [ "$LATEST_TAG" = "v0.0.0" ]; then
+          # Get all commits if no previous tags exist
+          COMMITS=$(git log --oneline --pretty=format:"%s")
+        else
+          # Get commits since last tag
+          COMMITS=$(git log ${LATEST_TAG}..HEAD --oneline --pretty=format:"%s")
+        fi
+        
+        echo "Analyzing commits since $LATEST_TAG:"
+        echo "$COMMITS"
+        
+        # Initialize increment flags
+        HAS_BREAKING=false
+        HAS_FEAT=false
+        HAS_FIX=false
+        
+        # Analyze each commit message for conventional commit patterns
+        while IFS= read -r commit_msg; do
+          # Skip empty lines
+          [ -z "$commit_msg" ] && continue
+          
+          echo "Analyzing commit: $commit_msg"
+          
+          # Check for breaking changes (BREAKING CHANGE in body or ! after type)
+          if echo "$commit_msg" | grep -qE "(BREAKING CHANGE|!:)" ; then
+            echo "  → Found BREAKING CHANGE"
+            HAS_BREAKING=true
+          # Check for feat: prefix (new features)
+          elif echo "$commit_msg" | grep -qE "^feat(\(.+\))?:" ; then
+            echo "  → Found feature commit"
+            HAS_FEAT=true
+          # Check for fix: prefix (bug fixes)
+          elif echo "$commit_msg" | grep -qE "^fix(\(.+\))?:" ; then
+            echo "  → Found fix commit"
+            HAS_FIX=true
+          else
+            echo "  → Non-versioning commit (chore, docs, etc.)"
+          fi
+        done <<< "$COMMITS"
+        
+        # Determine version increment based on conventional commit analysis
+        # Priority: BREAKING > FEAT > FIX
+        NEW_MAJOR=$MAJOR
+        NEW_MINOR=$MINOR
+        NEW_PATCH=$PATCH
+        
+        if [ "$HAS_BREAKING" = true ]; then
+          # Breaking change: increment major, reset minor and patch to 0
+          NEW_MAJOR=$((MAJOR + 1))
+          NEW_MINOR=0
+          NEW_PATCH=0
+          INCREMENT_TYPE="major"
+          echo "Breaking change detected - incrementing major version"
+        elif [ "$HAS_FEAT" = true ]; then
+          # New feature: increment minor, reset patch to 0
+          NEW_MINOR=$((MINOR + 1))
+          NEW_PATCH=0
+          INCREMENT_TYPE="minor"
+          echo "Feature detected - incrementing minor version"
+        elif [ "$HAS_FIX" = true ]; then
+          # Bug fix: increment patch only
+          NEW_PATCH=$((PATCH + 1))
+          INCREMENT_TYPE="patch"
+          echo "Fix detected - incrementing patch version"
+        else
+          # No versioning commits found
+          INCREMENT_TYPE="none"
+          echo "No version-incrementing commits found"
+        fi
+        
+        # Construct new version
+        NEW_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+        NEW_TAG="v$NEW_VERSION"
+        
+        # Output results for use in subsequent steps
+        echo "=== VERSION INCREMENT SUMMARY ==="
+        echo "Previous version: $CURRENT_VERSION"
+        echo "New version: $NEW_VERSION"
+        echo "Increment type: $INCREMENT_TYPE"
+        echo "New tag: $NEW_TAG"
+        
+        # Set outputs for other steps to use
+        echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+        echo "increment_type=$INCREMENT_TYPE" >> $GITHUB_OUTPUT
+        echo "should_release=$( [ "$INCREMENT_TYPE" != "none" ] && echo "true" || echo "false" )" >> $GITHUB_OUTPUT
+    
+    - name: Create and push new tag
+      if: steps.version.outputs.should_release == 'true'
+      run: |
+        # Configure git with GitHub Actions bot identity
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        
+        # Create annotated tag with release information
+        git tag -a "${{ steps.version.outputs.new_tag }}" -m "Release ${{ steps.version.outputs.new_version }}
+        
+        Increment type: ${{ steps.version.outputs.increment_type }}
+        Previous version: ${{ steps.version.outputs.current_version }}
+        
+        Generated by GitHub Actions"
+        
+        # Push the new tag to the repository
+        git push origin "${{ steps.version.outputs.new_tag }}"
+        
+        echo "✅ Created and pushed tag: ${{ steps.version.outputs.new_tag }}"
+    
+    - name: Output version information
+      run: |
+        echo "## Version Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **Previous Version:** ${{ steps.version.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **New Version:** ${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Increment Type:** ${{ steps.version.outputs.increment_type }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **New Tag:** ${{ steps.version.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Should Release:** ${{ steps.version.outputs.should_release }}" >> $GITHUB_STEP_SUMMARY
+    
+    - name: Skip message
+      if: steps.version.outputs.should_release == 'false'
+      run: |
+        echo "⏭️ No version increment needed - no feat/fix commits found"
+        echo "## No Release Required" >> $GITHUB_STEP_SUMMARY
+        echo "No conventional commits (feat/fix) found since last release." >> $GITHUB_STEP_SUMMARY
