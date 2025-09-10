@@ -306,7 +306,7 @@ Based on this tool result, determine your final price (can be the same or adjust
             f"{justification.replace('|', ';')}|{agent_decision}|{expected_tool}|{tool_price}|"
             f"{tool_calls_log.replace('|', ';')}|{len(tool_calls)}\n"
         )
-
+    #endregion EVALS05
     print("FINAL_STATE in publisher:", state)
     return state
 
@@ -358,7 +358,7 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|EVALUATOR|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{time_taken:.2f}\n"
         )
-
+    #endregion EVALS01
     if result.binary_score == "yes":
         print("NEXT: EDITOR")
         return "editor"
@@ -394,7 +394,7 @@ def translate_article(state: AgentState) -> AgentState:
     time_taken = end - start
     print(f"Execution time: {time_taken:.2f} seconds")
     OUTPUT = result
-    # region EVALS02
+    #region EVALS02
     with open(
         "./src/case_study1/langgraph/02_article_writer_translate.csv",
         "a",
@@ -403,7 +403,7 @@ def translate_article(state: AgentState) -> AgentState:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|TRANSLATE|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
-
+    #endregion EVALS02
     state["article_state"] = result.content
     return state
 
@@ -432,7 +432,7 @@ def expand_article(state: AgentState) -> AgentState:
     result_dict = result.dict()
     print(f"Result as dict: {result_dict}")
     state["article_state"] = result.content
-    # region EVALS03
+    #region EVALS03
     with open(
         "./src/case_study1/langgraph/03_article_writer_expand.csv",
         "a",
@@ -441,6 +441,7 @@ def expand_article(state: AgentState) -> AgentState:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|EXPANDER|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
+    #endregion EVALS03
     return state
 
 
@@ -490,7 +491,7 @@ def editor_router(
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|PUBLISHER|{MODEL}|{TEMPERATURE}|{INPUT[:75]}...|{OUTPUT}|{input_tokens}|{output_tokens}|{time_taken:.2f}\n"
         )
-
+    # endregion EVALS04
     num_words = len(INPUT.split())
 
     console.print(f"[green]Number of Words: {num_words}[/]")
