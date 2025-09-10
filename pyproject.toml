@@ -66,4 +66,5 @@ dependencies = [
     "twitter>=1.19.6",
     "unstructured[md]>=0.18.2",
     "wikipedia>=1.4.0",
+    "workflow>=2.1.6",
 ]

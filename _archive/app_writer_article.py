@@ -6,8 +6,10 @@
 
 import os
 from datetime import datetime
+import warnings
+import time
+from random import randint
 
-from openai import OpenAI
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -17,25 +19,44 @@ from typing import TypedDict, Literal
 from pydantic import BaseModel, Field
 from rich.console import Console
 from dotenv import load_dotenv, find_dotenv
-import warnings
+import tiktoken
+from config_langgraph import (
+    PROVIDER,
+    MODEL,
+    TEMPERATURE,
+    LANGUAGE,
+    SUBJECT,
+    CONTENT_LENGTH,
+)
 
-warnings.filterwarnings("ignore")
+from datasets.blog_titles_list import blog_titles
+
+print(len(blog_titles))
 console = Console()
-load_dotenv(find_dotenv())
-# Load environment variables from .env file
-MODEL = "gpt-4o-mini"
-TEMPERATURE = 0
-LANGUAGE = "FRENCH"
-SUBJECT = "AI, ML, Data Science, Programming, Web, Technology"
-CONTENT_LENGTH = 100
-MAX_LENGTH = 100
+load_dotenv(find_dotenv(), override=True)
+
+console.print(f"\n[cyan]Using {PROVIDER} provider with model {MODEL}[/]")
+
+
+# MODEL = "gpt-4o-mini"
+# TEMPERATURE = 0
+# LANGUAGE = "FRENCH"
+# SUBJECT = "AI, ML, Data Science, Programming, Web, Technology"
+# CONTENT_LENGTH = 100
+
+human_prompt = "News Article:\n\n {article}"
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if OPENAI_API_KEY:
-    console.print(
-        f"[green]OpenAI API Key exists and begins {OPENAI_API_KEY[:14]}...[/]"
-    )
+    console.print(f"[cyan]OpenAI API Key exists and begins {OPENAI_API_KEY[:14]}...[/]")
 else:
     console.print("[red]OpenAI API Key not set[/]")
+
+
+def count_tokens(text: str, model=MODEL) -> int:
+    """Count tokens in text using tiktoken"""
+    encoding = tiktoken.encoding_for_model(model)
+    return len(encoding.encode(text))
 
 
 def get_report_date():
@@ -43,6 +64,27 @@ def get_report_date():
     Returns the current date and time formatted as a string.
     """
     return datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+
+# NEW: Publisher Tool Functions
+def get_article_price() -> int:
+    """Tool that returns a random price for the article between 10-90 GBP"""
+    price = randint(10, 90)
+    console.print(f"[blue]📊 Article Price Tool: Generated price £{price}[/]")
+    return price
+
+
+def rate_article_price(price: int) -> str:
+    """Tool that rates the price based on predefined ranges"""
+    if 10 <= price <= 40:
+        rating = "VERY_GOOD_VALUE"
+    elif 41 <= price <= 70:
+        rating = "GOOD_VALUE"
+    else:  # price > 70
+        rating = "EXPENSIVE"
+    
+    console.print(f"[yellow]💰 Price Rating Tool: £{price} is rated as {rating}[/]")
+    return rating
 
 
 class TransferNewsGrader(BaseModel):
@@ -65,7 +107,7 @@ class ArticlePostabilityGrader(BaseModel):
     is_not_sensationalistic: str = Field(
         description="The article is NOT written in a sensationalistic style, 'yes' or 'no'"
     )
-    is_language_french: str = Field(
+    is_correct_language: str = Field(
         description=f"The language of the article is {LANGUAGE}, 'yes' or 'no'"
     )
 
@@ -87,15 +129,43 @@ def evaluate_article(state: AgentState) -> AgentState:
 
 
 def publisher(state: AgentState) -> AgentState:
-    # print(f"publisher: Current state: {state}")
-    # print("FINAL_STATE in publisher:", state)
+    console.print(f"[magenta bold]📰 PUBLISHER NODE: Processing article for publication[/]")
+    print(f"publisher: Current state: {state}")
+    
+    # Use Tool 1: Get article price
+    article_price = get_article_price()
+    
+    # Use Tool 2: Rate the price
+    price_rating = rate_article_price(article_price)
+    
+    # Track tool calls for logging
+    tool_calls = f"get_article_price()={article_price};rate_article_price({article_price})={price_rating}"
+    
+    # Display results
+    console.print(f"[green bold]✅ PUBLICATION SUMMARY:[/]")
+    console.print(f"[white]   • Article Price: £{article_price}[/]")
+    console.print(f"[white]   • Price Rating: {price_rating}[/]")
+    console.print(f"[white]   • Article Length: {len(state['article_state'].split())} words[/]")
+    console.print(f"[white]   • Tool Calls: {tool_calls}[/]")
+    
+    # Log to CSV for tracking
+    with open(
+        "./src/case_study1/langgraph/05_article_writer_publisher_pricing.csv",
+        "a",
+        encoding="utf-8",
+    ) as f:
+        f.write(
+            f"{get_report_date()}|ARTICLE_WRITER|PUBLISHER_PRICING|{article_price}|{price_rating}|{len(state['article_state'].split())}|{tool_calls}\n"
+        )
+    
+    print("FINAL_STATE in publisher:", state)
     return state
 
 
 def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
     article = state["article_state"]
     INPUT = article
-    print(f"evaluator_router: INPUT: {article}")
+    print(f"evaluator_router:\n\tINPUT: {article}")
     MODEL = "gpt-4o-mini"
     TEMPERATURE = 0
 
@@ -108,56 +178,35 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
     system = f"""You are a researcher that determines the content type of an article.
         Check if the article refers to {SUBJECT} area.
         Provide a binary score 'yes' or 'no' to indicate whether the article is technical in nature."""
+
     grade_prompt = ChatPromptTemplate.from_messages(
-        [("system", system), ("human", "News Article:\n\n {article}")]
+        [("system", system), ("human", human_prompt)]
     )
     # should_write = grade_prompt | structured_llm_grader
     evaluator = grade_prompt | structured_llm_grader
+    start = time.perf_counter()
     result = evaluator.invoke({"article": article})
-
-    # This is to get a different more detailed response from the LLM using OpenAI rather than LangChain
-    client = OpenAI()
-    completion = client.chat.completions.parse(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": "News Article:\n\n {article}"}],
-        response_format=TransferNewsGrader,
-    )
-    # The completion object has these main attributes:
-    print(f"ID: {completion.id}")
-    print(f"Object: {completion.object}")
-    print(f"Created: {completion.created}")
-    print(f"Model: {completion.model}")
-    print(f"System fingerprint: {completion.system_fingerprint}")
-
-    # Usage statistics
-    usage = completion.usage
-    print(f"Prompt tokens: {usage.prompt_tokens}")
-    print(f"Completion tokens: {usage.completion_tokens}")
-    print(f"Total tokens: {usage.total_tokens}")
-
-    # Choice details
-    choice = completion.choices[0]
-    print(f"Finish reason: {choice.finish_reason}")
-    print(f"Index: {choice.index}")
-
-    # Message content
-    message = choice.message
-    print(f"Role: {message.role}")
-    print(f"Content: {message.content}")
-    print(f"Parsed: {message.parsed}")  # Your structured Pydantic object
-    print(f"Refusal: {message.refusal}")  # If model refused to respond
-
-    OUTPUT1 = completion.binary_score
-    console.print(f"[green italic]binary_score: {result}[/]")
-
+    end = time.perf_counter()
+    time_taken = end - start
+    print(f"Execution time: {time_taken:.2f} seconds")
+    print("RESULT:")
+    print(result)
+    print("END RESULT")
     OUTPUT = result.binary_score
-    console.print(f"[green]Evaluator Result: {result}[/]")
-    print(f"evaluator_router: OUTPUT: {OUTPUT}")
+    console.print(f"OUTPUT -> [green italic]binary_score: {OUTPUT}[/]")
 
+    input_tokens = count_tokens(human_prompt, MODEL)
+    print(f"01 Estimated input tokens: {input_tokens}")
+
+    # Count output tokens
+    output_tokens = count_tokens(str(result), MODEL)
+    print(f"01 Estimated output tokens: {output_tokens}")
+    print(f"01 Estimated total tokens: {input_tokens + output_tokens}")
+    # NOTES:
+    # In reality we add a trace_id to group the evaluations together and we add a span_id to identify the individual evaluation
     #################### EVALS01 ####################
     #
-    # This can be standardised during development
-    # DATE|COMPONENT_CODE|MODEL|TEMPERATURE|INPUT|OUTPUT and any optional fields
+    # TRACE_ID|DATETIME|APP|SPAN_ID|MODEL|TEMPERATURE|INPUT|OUTPUT|INPUT_TOKENS|OUTPUT_TOKENS|TIME and any optional fields
     #
     with open(
         "./src/case_study1/langgraph/01_article_writer_should_write.csv",
@@ -165,7 +214,7 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
         encoding="utf-8",
     ) as f:
         f.write(
-            f"{get_report_date()}|ARTICLE_WRITER|EVALUATOR|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{result}|\n"
+            f"{get_report_date()}|ARTICLE_WRITER|EVALUATOR|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{time_taken:.2f}\n"
         )
     ##############################################
 
@@ -195,22 +244,30 @@ def translate_article(state: AgentState) -> AgentState:
     result = translator.invoke({"article": article})
 
     INPUT = article
+
+    start = time.perf_counter()
+
     result = translator.invoke({"article": article})
+    result_dict = result.dict()
+    print(f"Result as dict: {result_dict}")
+    end = time.perf_counter()
+    time_taken = end - start
+    print(f"Execution time: {time_taken:.2f} seconds")
     OUTPUT = result
+    
+    
     #################### EVALS02 ####################
-    #
-    # This can be standardised during development
-    # DATE|COMPONENT_CODE|MODEL|TEMPERATURE|INPUT|OUTPUT and any optional fields
-    #
     with open(
         "./src/case_study1/langgraph/02_article_writer_translate.csv",
         "a",
         encoding="utf-8",
     ) as f:
         f.write(
-            f"{get_report_date()}|ARTICLE_WRITER|TRANSLATE|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{result}|\n"
+            f"{get_report_date()}|ARTICLE_WRITER|TRANSLATE|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
     ##############################################
+    
+    
     state["article_state"] = result.content
     return state
 
@@ -228,9 +285,16 @@ def expand_article(state: AgentState) -> AgentState:
     print(f"expand_article: Current state: {state}")
     article = state["article_state"]
     INPUT = article
+
+    start = time.perf_counter()
     result = expander.invoke({"article": article})
-    # print(result)
+    end = time.perf_counter()
+    time_taken = end - start
+    print(f"Execution time: {time_taken:.2f} seconds")
     OUTPUT = result.content
+    print(type(result))
+    result_dict = result.dict()
+    print(f"Result as dict: {result_dict}")
     state["article_state"] = result.content
     #################### EVALS03 ####################
     #
@@ -243,7 +307,7 @@ def expand_article(state: AgentState) -> AgentState:
         encoding="utf-8",
     ) as f:
         f.write(
-            f"{get_report_date()}|ARTICLE_WRITER|EXPANDER|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{result}|\n"
+            f"{get_report_date()}|ARTICLE_WRITER|EXPANDER|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
     ##############################################
     return state
@@ -262,20 +326,31 @@ def editor_router(
     postability_system = f"""You are a grader assessing whether a news article is ready to be posted, if it meets the minimum word count of {CONTENT_LENGTH} words, is not written in a sensationalistic style, and if it is in {LANGUAGE}. \n
         Evaluate the article for grammatical errors, completeness, appropriateness for publication, and EXAGERATED sensationalism. \n
         Also, confirm if the language used in the article is {LANGUAGE} and it meets the word count requirement. \n
-        Provide four binary scores: one to indicate if the article can be posted ('yes' or 'no'), one for adequate word count ('yes' or 'no'), one for sensationalistic writing ('yes' or 'no'), and another if the language is {LANGUAGE} ('yes' or 'no')."""
+        Provide four binary scores: one to indicate if the article can be posted ('yes' or 'no'), one for adequate word count ('yes' or 'no'), one for not sensationalistic writing ('yes' or 'no'), and another if the language is {LANGUAGE} ('yes' or 'no')."""
     postability_grade_prompt = ChatPromptTemplate.from_messages(
-        [("system", postability_system), ("human", "News Article:\n\n {article}")]
+        [("system", postability_system), ("human", human_prompt)]
     )
 
     editor = postability_grade_prompt | structured_llm_postability_grader
 
     article = state["article_state"]
+
+    start = time.perf_counter()
     result = editor.invoke({"article": article})
+    end = time.perf_counter()
+    time_taken = end - start
+    print(f"Execution time: {time_taken:.2f} seconds")
     print(f"news_chef_router: Current state: {state}")
-    print("Editor result: ", result)
+    console.print(f"[dark_orange]Editor result: \n\t{result}[/]")
     INPUT = article
     OUTPUT = result
+    input_tokens = count_tokens(human_prompt, MODEL)
+    print(f"Estimated input tokens: {input_tokens}")
 
+    # Count output tokens
+    output_tokens = count_tokens(str(OUTPUT), MODEL)
+    print(f"Estimated output tokens: {output_tokens}")
+    print(f"Estimated total tokens: {input_tokens + output_tokens}")
     #################### EVALS04 ####################
     #
     # This can be standardised during development
@@ -287,7 +362,7 @@ def editor_router(
         encoding="utf-8",
     ) as f:
         f.write(
-            f"{get_report_date()}|ARTICLE_WRITER|PUBLISHER|{MODEL}|{TEMPERATURE}|{INPUT[:75]}...|{OUTPUT}|{result}|\n"
+            f"{get_report_date()}|ARTICLE_WRITER|PUBLISHER|{MODEL}|{TEMPERATURE}|{INPUT[:75]}...|{OUTPUT}|{input_tokens}|{output_tokens}|{time_taken:.2f}\n"
         )
     ##############################################
     num_words = len(INPUT.split())
@@ -295,7 +370,7 @@ def editor_router(
     console.print(f"[green]Number of Words: {num_words}[/]")
     if result.can_be_posted == "yes":
         return "publisher"
-    elif result.is_language_french == "yes":
+    elif result.is_correct_language == "yes":
         if result.meets_word_count == "no" or result.is_not_sensationalistic == "no":
             return "expander"
     return "translator"
@@ -327,16 +402,25 @@ app = workflow.compile()
 
 # Run tests...
 
-print("\n======================================")
-print("FIRST EXAMPLE...\n")
-initial_state = {"article_state": "Planning permission for 49 England Road sought"}
-result = app.invoke(initial_state)
+NUM_TITLES = len(blog_titles)
+TITLE_LIMIT = randint(1, NUM_TITLES)  # Randomly choose a limit for testing
 
-print("Final result:", result)
+# run for all 30 title pairs
+for i in range(len(blog_titles)):
+    print("\n======================================")
+    print("NON AI EXAMPLE...\n")
+    non_ai_article = blog_titles[i][1]
+    print(f"Non-AI article: {non_ai_article}")
+    initial_state = {"article_state": blog_titles[i][1]}
+    result = app.invoke(initial_state)
 
-print("\n======================================")
-print("SECOND EXAMPLE...\n")
-initial_state = {"article_state": "AI and Machine learning in modern business"}
-result = app.invoke(initial_state)
+    # print("Final result:", result)
 
-print("Final article:\n\n", result["article_state"])
+    print("\n======================================")
+    print("AI EXAMPLE...\n")
+    ai_article = blog_titles[i][0]
+    print(f"AI article: {ai_article}")
+    initial_state = {"article_state": blog_titles[i][0]}
+    result = app.invoke(initial_state)
+
+    # print("Final article:\n\n", result["article_state"])
