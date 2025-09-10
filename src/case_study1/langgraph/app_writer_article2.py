@@ -1,8 +1,6 @@
 # ### Team of Agents with a supervisor
 
-
 # https://www.youtube.com/watch?v=9HhcFiSgLok&list=PLNVqeXDm5tIqUIPQHLk5Xw5mpisruvsac&index=7
-
 
 import os
 from datetime import datetime
@@ -37,13 +35,6 @@ load_dotenv(find_dotenv(), override=True)
 
 console.print(f"\n[cyan]Using {PROVIDER} provider with model {MODEL}[/]")
 
-
-# MODEL = "gpt-4o-mini"
-# TEMPERATURE = 0
-# LANGUAGE = "FRENCH"
-# SUBJECT = "AI, ML, Data Science, Programming, Web, Technology"
-# CONTENT_LENGTH = 100
-
 human_prompt = "News Article:\n\n {article}"
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -76,7 +67,7 @@ def get_article_price_randomly() -> int:
 
 def get_article_price_based_on_word_count() -> int:
     """Tool that returns a price for the article between 10-90 GBP based on word count and your own logic"""
-    price = randint(50,200) / 2.5
+    price = randint(50, 200) / 2.5
     console.print(f"[blue]📊 Article Price Tool: Generated price £{price}[/]")
     return price
 
@@ -138,14 +129,10 @@ class AgentState(TypedDict):
 
 
 def get_transfer_news_grade(state: AgentState) -> AgentState:
-    # print(f"get_transfer_news_grade: Current state: {state}")
-    # print("Evaluator: Reading article but doing nothing to change it...")
     return state
 
 
 def evaluate_article(state: AgentState) -> AgentState:
-    # print(f"evaluate_article: Current state: {state}")
-    # print("News : Reading article but doing nothing to change it...")
     return state
 
 
@@ -166,20 +153,44 @@ def publisher(state: AgentState) -> AgentState:
     article = state["article_state"]
     word_count = len(article.split())
 
-    # Agentic publisher prompt
-    publisher_system = """As a publisher you determine the price of the article and also rate it cost effective value.
+    # Randomly decide which pricing approach to use
+    use_word_count_pricing = randint(0, 1) == 1  # 50/50 chance
 
+    # Enhanced agentic publisher prompt with tool usage instructions
+    if use_word_count_pricing:
+        pricing_instruction = """You should use the get_article_price_based_on_word_count() tool to determine the base price. 
+        This tool considers word count in its pricing logic. Call this tool and then you may adjust the price 
+        slightly based on content quality, but stay within the 10-90 GBP range."""
+        expected_tool = "get_article_price_based_on_word_count"
+    else:
+        pricing_instruction = """You should use the get_article_price_randomly() tool to get a random price between 10-90 GBP. 
+        Call this tool and then you may adjust the price based on article quality and word count, 
+        but stay within the 10-90 GBP range."""
+        expected_tool = "get_article_price_randomly"
+
+    publisher_system = f"""As a publisher you determine the price of the article and also rate its cost-effectiveness.
+
+    PRICING STRATEGY:
+    {pricing_instruction}
     
-    Price range must be between 10-90 GBP:
-    You can use a tool that generates a random price between 10-90 GBP or you can make up a price yourself, however you must justify your decision.
-    
+    After getting the tool result, you can make final adjustments but must stay within 10-90 GBP range.
     
     Rate the cost-effectiveness as:
     - VERY_GOOD_VALUE: 10-40 GBP (excellent value for money)
     - GOOD_VALUE: 41-70 GBP (reasonable pricing)  
     - EXPENSIVE: 71-90 GBP (premium pricing)
     
-    Provide your pricing decision with justification."""
+    Then use the rate_article_price() tool to get the official rating for your chosen price.
+    
+    Provide your final pricing decision with justification explaining:
+    1. Which tool you used and why
+    2. Any adjustments you made to the tool result
+    3. How the final price reflects the article's value
+    
+    Available tools:
+    - get_article_price_randomly(): Returns random price 10-90 GBP
+    - get_article_price_based_on_word_count(): Returns price based on word count logic
+    - rate_article_price(price): Returns rating for a given price"""
 
     publisher_prompt = ChatPromptTemplate.from_messages(
         [
@@ -188,12 +199,58 @@ def publisher(state: AgentState) -> AgentState:
         ]
     )
 
-    # Create the publisher agent
-    publisher_agent = publisher_prompt | structured_llm_publisher
+    # Simulate tool usage (since we can't actually bind tools to the structured output)
+    start = time.perf_counter()
+
+    # Call the appropriate pricing tool
+    tool_calls = []
+
+    if use_word_count_pricing:
+        tool_price = get_article_price_based_on_word_count()
+        tool_calls.append(
+            {
+                "tool_name": "get_article_price_based_on_word_count",
+                "arguments": {},
+                "result": tool_price,
+            }
+        )
+    else:
+        tool_price = get_article_price_randomly()
+        tool_calls.append(
+            {
+                "tool_name": "get_article_price_randomly",
+                "arguments": {},
+                "result": tool_price,
+            }
+        )
+
+    # Create enhanced prompt with tool result
+    enhanced_prompt = f"""Article to price (Word count: {word_count}):
+
+{article}
+
+TOOL RESULT: The {expected_tool} tool returned: £{tool_price}
+
+Based on this tool result, determine your final price (can be the same or adjusted within 10-90 GBP) and provide justification."""
 
     # Get pricing decision from the agent
-    start = time.perf_counter()
-    result = publisher_agent.invoke({"article": article, "word_count": word_count})
+    result = structured_llm_publisher.invoke(
+        [
+            {"role": "system", "content": publisher_system},
+            {"role": "human", "content": enhanced_prompt},
+        ]
+    )
+
+    # Get the rating for the final price
+    price_rating = rate_article_price(result.article_price)
+    tool_calls.append(
+        {
+            "tool_name": "rate_article_price",
+            "arguments": {"price": result.article_price},
+            "result": price_rating,
+        }
+    )
+
     end = time.perf_counter()
     time_taken = end - start
 
@@ -203,24 +260,29 @@ def publisher(state: AgentState) -> AgentState:
 
     # Extract results
     article_price = result.article_price
-    price_rating = result.price_rating
     justification = result.pricing_justification
 
-    # Track agent decision for logging
-    agent_decision = f"LLM_PRICING: price={article_price}, rating={price_rating}, justification='{justification[:50]}...'"
+    # Enhanced agent decision tracking
+    tool_summary = " | ".join(
+        [
+            f"{tc['tool_name']}({', '.join([f'{k}={v}' for k, v in tc['arguments'].items()])})={tc['result']}"
+            for tc in tool_calls
+        ]
+    )
+    agent_decision = f"LLM_PRICING: strategy={expected_tool}, tools_used=[{tool_summary}], final_price={article_price}, rating={price_rating}"
 
     # Display results
     console.print(f"[green bold]✅ PUBLICATION SUMMARY:[/]")
-    console.print(f"[white]   • Article Price: £{article_price}[/]")
+    console.print(f"[white]   • Pricing Strategy: {expected_tool}[/]")
+    console.print(f"[white]   • Tool Price: £{tool_price}[/]")
+    console.print(f"[white]   • Final Article Price: £{article_price}[/]")
     console.print(f"[white]   • Price Rating: {price_rating}[/]")
     console.print(f"[white]   • Article Length: {word_count} words[/]")
+    console.print(f"[white]   • Tools Called: {len(tool_calls)}[/]")
     console.print(f"[white]   • Pricing Justification: {justification}[/]")
-    console.print(f"[white]   • Agent Decision: {agent_decision}[/]")
 
     # Calculate tokens for cost tracking
-    input_text = (
-        f"{publisher_system}\nArticle to price (Word count: {word_count}):\n\n{article}"
-    )
+    input_text = f"{publisher_system}\n{enhanced_prompt}"
     input_tokens = count_tokens(input_text, MODEL)
     output_tokens = count_tokens(str(result), MODEL)
 
@@ -228,14 +290,21 @@ def publisher(state: AgentState) -> AgentState:
         f"[cyan]   • Token Usage: Input={input_tokens}, Output={output_tokens}, Total={input_tokens + output_tokens}[/]"
     )
 
-    # Log to CSV for tracking
+    # Enhanced logging with tool details
+    tool_calls_log = "|".join(
+        [f"{tc['tool_name']}({tc['arguments']})={tc['result']}" for tc in tool_calls]
+    )
+    # region EVALS05
     with open(
         "./src/case_study1/langgraph/05_article_writer_publisher_pricing.csv",
         "a",
         encoding="utf-8",
     ) as f:
         f.write(
-            f"{get_report_date()}|ARTICLE_WRITER|PUBLISHER_AGENTIC|{MODEL}|{TEMPERATURE}|{article_price}|{price_rating}|{word_count}|{input_tokens}|{output_tokens}|{time_taken:.2f}|{justification.replace('|', ';')}|{agent_decision}\n"
+            f"{get_report_date()}|ARTICLE_WRITER|PUBLISHER_AGENTIC|{MODEL}|{TEMPERATURE}|"
+            f"{article_price}|{price_rating}|{word_count}|{input_tokens}|{output_tokens}|{time_taken:.2f}|"
+            f"{justification.replace('|', ';')}|{agent_decision}|{expected_tool}|{tool_price}|"
+            f"{tool_calls_log.replace('|', ';')}|{len(tool_calls)}\n"
         )
 
     print("FINAL_STATE in publisher:", state)
@@ -262,7 +331,6 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
     grade_prompt = ChatPromptTemplate.from_messages(
         [("system", system), ("human", human_prompt)]
     )
-    # should_write = grade_prompt | structured_llm_grader
     evaluator = grade_prompt | structured_llm_grader
     start = time.perf_counter()
     result = evaluator.invoke({"article": article})
@@ -278,16 +346,10 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
     input_tokens = count_tokens(human_prompt, MODEL)
     print(f"01 Estimated input tokens: {input_tokens}")
 
-    # Count output tokens
     output_tokens = count_tokens(str(result), MODEL)
     print(f"01 Estimated output tokens: {output_tokens}")
     print(f"01 Estimated total tokens: {input_tokens + output_tokens}")
-    # NOTES:
-    # In reality we add a trace_id to group the evaluations together and we add a span_id to identify the individual evaluation
-    #################### EVALS01 ####################
-    #
-    # TRACE_ID|DATETIME|APP|SPAN_ID|MODEL|TEMPERATURE|INPUT|OUTPUT|INPUT_TOKENS|OUTPUT_TOKENS|TIME and any optional fields
-    #
+    # region EVALS01
     with open(
         "./src/case_study1/langgraph/01_article_writer_should_write.csv",
         "a",
@@ -296,7 +358,6 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|EVALUATOR|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{time_taken:.2f}\n"
         )
-    ##############################################
 
     if result.binary_score == "yes":
         print("NEXT: EDITOR")
@@ -307,7 +368,6 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
 
 
 def translate_article(state: AgentState) -> AgentState:
-    # print(f"translate_article: Current state: {state}")
     article = state["article_state"]
     llm_translation = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
@@ -334,8 +394,7 @@ def translate_article(state: AgentState) -> AgentState:
     time_taken = end - start
     print(f"Execution time: {time_taken:.2f} seconds")
     OUTPUT = result
-
-    #################### EVALS02 ####################
+    # region EVALS02
     with open(
         "./src/case_study1/langgraph/02_article_writer_translate.csv",
         "a",
@@ -344,7 +403,6 @@ def translate_article(state: AgentState) -> AgentState:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|TRANSLATE|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
-    ##############################################
 
     state["article_state"] = result.content
     return state
@@ -374,11 +432,7 @@ def expand_article(state: AgentState) -> AgentState:
     result_dict = result.dict()
     print(f"Result as dict: {result_dict}")
     state["article_state"] = result.content
-    #################### EVALS03 ####################
-    #
-    # This can be standardised during development
-    # DATE|COMPONENT_CODE|MODEL|TEMPERATURE|INPUT|OUTPUT and any optional fields
-    #
+    # region EVALS03
     with open(
         "./src/case_study1/langgraph/03_article_writer_expand.csv",
         "a",
@@ -387,7 +441,6 @@ def expand_article(state: AgentState) -> AgentState:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|EXPANDER|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
-    ##############################################
     return state
 
 
@@ -425,15 +478,10 @@ def editor_router(
     input_tokens = count_tokens(human_prompt, MODEL)
     print(f"Estimated input tokens: {input_tokens}")
 
-    # Count output tokens
     output_tokens = count_tokens(str(OUTPUT), MODEL)
     print(f"Estimated output tokens: {output_tokens}")
     print(f"Estimated total tokens: {input_tokens + output_tokens}")
-    #################### EVALS04 ####################
-    #
-    # This can be standardised during development
-    # DATE|COMPONENT_CODE|MODEL|TEMPERATURE|INPUT|OUTPUT and any optional fields
-    #
+    # region EVALS04
     with open(
         "./src/case_study1/langgraph/04_article_writer_publishable.csv",
         "a",
@@ -442,7 +490,7 @@ def editor_router(
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|PUBLISHER|{MODEL}|{TEMPERATURE}|{INPUT[:75]}...|{OUTPUT}|{input_tokens}|{output_tokens}|{time_taken:.2f}\n"
         )
-    ##############################################
+
     num_words = len(INPUT.split())
 
     console.print(f"[green]Number of Words: {num_words}[/]")
@@ -492,13 +540,9 @@ for i in range(len(blog_titles)):
     initial_state = {"article_state": blog_titles[i][1]}
     result = app.invoke(initial_state)
 
-    # print("Final result:", result)
-
     print("\n======================================")
     print("AI EXAMPLE...\n")
     ai_article = blog_titles[i][0]
     print(f"AI article: {ai_article}")
     initial_state = {"article_state": blog_titles[i][0]}
     result = app.invoke(initial_state)
-
-    # print("Final article:\n\n", result["article_state"])
