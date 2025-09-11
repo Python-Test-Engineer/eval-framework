@@ -5,7 +5,7 @@ blog_titles = [
     ),
     (
         "Why AI Agents Will Replace Traditional Software",
-        "Minimalist Living: How Less Can Mean More",
+        "Minimalist Living: How Less Can Mean More with AI",
     ),
     (
         "The Ethics of Autonomous AI Decision-Making",
@@ -13,7 +13,7 @@ blog_titles = [
     ),
     (
         "Multi-Agent Systems: When AI Agents Work Together",
-        "The Psychology of Color in Interior Design",
+        "The Psychology of Agents in Interior Design",
     ),
     (
         "From Chatbots to AI Agents: The Evolution of Conversational AI",
