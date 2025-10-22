@@ -306,7 +306,7 @@ Based on this tool result, determine your final price (can be the same or adjust
             f"{justification.replace('|', ';')}|{agent_decision}|{expected_tool}|{tool_price}|"
             f"{tool_calls_log.replace('|', ';')}|{len(tool_calls)}\n"
         )
-    #endregion EVALS05
+    # endregion EVALS05
     print("FINAL_STATE in publisher:", state)
     return state
 
@@ -323,7 +323,7 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
         temperature=TEMPERATURE,
     )
     structured_llm_grader = llm.with_structured_output(TransferNewsGrader)
-
+    # region IS_AI
     system = f"""You are a researcher that determines the content type of an article.
         Check if the article refers to {SUBJECT} area.
         Provide a binary score 'yes' or 'no' to indicate whether the article is technical in nature."""
@@ -358,7 +358,7 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|EVALUATOR|{MODEL}|{TEMPERATURE}|{INPUT}|{OUTPUT}|{time_taken:.2f}\n"
         )
-    #endregion EVALS01
+    # endregion EVALS01
     if result.binary_score == "yes":
         print("NEXT: EDITOR")
         return "editor"
@@ -370,7 +370,7 @@ def evaluator_router(state: AgentState) -> Literal["editor", "not_relevant"]:
 def translate_article(state: AgentState) -> AgentState:
     article = state["article_state"]
     llm_translation = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-
+    # region TRANSLATE
     translation_system = f"""You are a translator converting articles into {LANGUAGE}. Translate the text accurately while maintaining the original tone and style."""
     translation_prompt = ChatPromptTemplate.from_messages(
         [
@@ -394,7 +394,7 @@ def translate_article(state: AgentState) -> AgentState:
     time_taken = end - start
     print(f"Execution time: {time_taken:.2f} seconds")
     OUTPUT = result
-    #region EVALS02
+    # region EVALS02
     with open(
         "./src/case_study1/langgraph/02_article_writer_translate.csv",
         "a",
@@ -403,7 +403,7 @@ def translate_article(state: AgentState) -> AgentState:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|TRANSLATE|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
-    #endregion EVALS02
+    # endregion EVALS02
     state["article_state"] = result.content
     return state
 
@@ -411,6 +411,7 @@ def translate_article(state: AgentState) -> AgentState:
 def expand_article(state: AgentState) -> AgentState:
     article = state["article_state"]
     llm_expansion = ChatOpenAI(model="gpt-4o-mini", temperature=0.5)
+    # regiond EXPANDER
     expansion_system = f"""You are a writer tasked with expanding the given article to at approximately {CONTENT_LENGTH} words, with some variation either side, while maintaining relevance, coherence, and the original tone."""
     expansion_prompt = ChatPromptTemplate.from_messages(
         [("system", expansion_system), ("human", "Original article:\n\n {article}")]
@@ -432,7 +433,7 @@ def expand_article(state: AgentState) -> AgentState:
     result_dict = result.dict()
     print(f"Result as dict: {result_dict}")
     state["article_state"] = result.content
-    #region EVALS03
+    # region EVALS03
     with open(
         "./src/case_study1/langgraph/03_article_writer_expand.csv",
         "a",
@@ -441,7 +442,7 @@ def expand_article(state: AgentState) -> AgentState:
         f.write(
             f"{get_report_date()}|ARTICLE_WRITER|EXPANDER|{MODEL}|{TEMPERATURE}|{INPUT}|{time_taken:.2f}|{result_dict}\n"
         )
-    #endregion EVALS03
+    # endregion EVALS03
     return state
 
 
@@ -454,7 +455,7 @@ def editor_router(
     structured_llm_postability_grader = llm_postability.with_structured_output(
         ArticlePostabilityGrader
     )
-
+    # region CAN_POST
     postability_system = f"""You are a grader assessing whether a news article is ready to be posted, if it meets the minimum word count of {CONTENT_LENGTH} words, is not written in a sensationalistic style, and if it is in {LANGUAGE}. \n
         Evaluate the article for grammatical errors, completeness, appropriateness for publication, and EXAGERATED sensationalism. \n
         Also, confirm if the language used in the article is {LANGUAGE} and it meets the word count requirement. \n
