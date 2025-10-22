@@ -167,7 +167,7 @@ def publisher(state: AgentState) -> AgentState:
         Call this tool and then you may adjust the price based on article quality and word count, 
         but stay within the 10-90 GBP range."""
         expected_tool = "get_article_price_randomly"
-
+    #region PRICING
     publisher_system = f"""As a publisher you determine the price of the article and also rate its cost-effectiveness.
 
     PRICING STRATEGY:
@@ -191,7 +191,7 @@ def publisher(state: AgentState) -> AgentState:
     - get_article_price_randomly(): Returns random price 10-90 GBP
     - get_article_price_based_on_word_count(): Returns price based on word count logic
     - rate_article_price(price): Returns rating for a given price"""
-
+    #endregion PUBLISHER_AGENTIC_PROMPT
     publisher_prompt = ChatPromptTemplate.from_messages(
         [
             ("system", publisher_system),
